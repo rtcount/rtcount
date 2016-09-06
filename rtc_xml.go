@@ -100,7 +100,7 @@ func SortTimeIndexArray(arr []string) (ret []string) {
 	return ret
 }
 
-func ArrayFilterAndFormat(arr []string, needsort bool) (ret []string) {
+func ArrayFilterAndFormat(arr []string) (ret []string) {
 
 	for _, val := range arr {
 		if len(val) == 0 || GetIndexInArrayByString(strings.ToUpper(val), ret) != -1 {
@@ -109,10 +109,11 @@ func ArrayFilterAndFormat(arr []string, needsort bool) (ret []string) {
 
 		ret = append(ret, strings.ToUpper(val))
 	}
-
-	if needsort == true {
-		sort.Sort(sort.StringSlice(ret))
-	}
+	/*
+		if needsort == true {
+			sort.Sort(sort.StringSlice(ret))
+		}
+	*/
 	return ret
 }
 
@@ -146,7 +147,7 @@ func CheckAndFix_table_key(table *Table, t_key *Table_Key) (string, bool) {
 
 	//check keyop
 	t_key.keyopFlag = 0
-	t_key.KeyOP.Op = ArrayFilterAndFormat(t_key.KeyOP.Op, true)
+	t_key.KeyOP.Op = ArrayFilterAndFormat(t_key.KeyOP.Op)
 	if t_len := len(t_key.KeyOP.Op); t_len == 0 {
 		t_key.KeyOP.Op = KEYOPS_default
 		t_key.keyopFlag = keyopFlag_default
@@ -172,7 +173,7 @@ func CheckAndFix_table_key(table *Table, t_key *Table_Key) (string, bool) {
 	}
 
 	//check Timeindex
-	t_key.Timeindex.Tm = ArrayFilterAndFormat(t_key.Timeindex.Tm, true)
+	t_key.Timeindex.Tm = ArrayFilterAndFormat(t_key.Timeindex.Tm)
 	if t_len := len(t_key.Timeindex.Tm); t_len == 0 {
 		t_key.Timeindex.Tm = TIMEINDEXS_defualt
 	} else {
@@ -192,7 +193,7 @@ func CheckAndFix_table_key(table *Table, t_key *Table_Key) (string, bool) {
 	//check index
 	if t_len := len(t_key.Index); t_len != 0 {
 		for i := 0; i < t_len; i++ {
-			t_key.Index[i].Columnref = ArrayFilterAndFormat(t_key.Index[i].Columnref, true)
+			t_key.Index[i].Columnref = ArrayFilterAndFormat(t_key.Index[i].Columnref)
 			c_len := len(t_key.Index[i].Columnref)
 			for c := 0; c < c_len; c++ {
 				c_in := GetIndexInArrayByString(t_key.Index[i].Columnref[c], table.Column)
@@ -208,6 +209,8 @@ func CheckAndFix_table_key(table *Table, t_key *Table_Key) (string, bool) {
 					goto Err
 				}
 			}
+			//对key索引列值进行排序，这样key索引位置可以变动，而不影响其生成
+			sort.Sort(sort.IntSlice(t_key.Index[i].i_columnref))
 		}
 
 	}
@@ -221,7 +224,7 @@ func CheckAndFix_table(table *Table) (string, bool) {
 	//fmt.Println(table)
 
 	//Upper table column
-	table.Column = ArrayFilterAndFormat(table.Column, false)
+	table.Column = ArrayFilterAndFormat(table.Column)
 
 	if k_len := len(table.Keys); k_len == 0 {
 		message := "[table:" + table.Name + "] key don't set"
