@@ -2,9 +2,9 @@ package main
 
 import (
 	"./freecache"
+	"./seefan/gossdb"
 	"bufio"
 	"fmt"
-	"github.com/seefan/gossdb"
 	"os"
 	"runtime"
 	"strconv"
@@ -276,8 +276,6 @@ func rtcount_core_union(conn *gossdb.Client, table *Table, t_key *Table_Key, key
 	for _, indx_val := range indexs {
 		s_kvkey := key_set_pre + op_key_pre + table.Name + "_" + t_key.Name + "_" +
 			date_map["ALL"] + "_" + indx_val
-		// --- fix index
-
 		//check localcace first
 		if freecache.Localcache_check_and_set(s_kvkey) == true {
 			//old key
