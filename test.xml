@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<all>
+	<httpport>9999</httpport>
+	<kvdb> <!-- ssdb -->
+		<host>127.0.0.1</host>
+		<port>8888</port>
+		<minpoolsize>5</minpoolsize>
+		<maxpoolsize>1000</maxpoolsize>
+	</kvdb>
+	<table name="test_game">
+		<column_terminated>,</column_terminated>
+		<line_terminated>;</line_terminated>
+		<column>date</column>
+		<column>did</column>
+		<column>pay</column>
+		<column>uid</column>
+		<column>code</column>
+		<column>appid</column>
+
+		<key name="user">
+			<key_columnref>uid</key_columnref>
+			<timestamp_columnref>date</timestamp_columnref>
+
+			<keyop default="COUNT,UNION">
+				<op>COUNT</op>
+				<op>UNION</op>
+				<op></op>
+			</keyop>
+
+			<timeindex default="HOUR,DAY">
+				<tmindex>MIN</tmindex>
+				<tmindex>MIN5</tmindex>
+				<tmindex>MIN10</tmindex>
+				<tmindex>MIN30</tmindex>
+				<tmindex>HOUR</tmindex>
+				<tmindex>DAY</tmindex>
+			</timeindex>
+
+			<index name="AppId">
+				<columnref>appid</columnref>
+			</index>
+			<index name="AppIdCode">
+				<columnref>appid</columnref>
+				<columnref>code</columnref>
+			</index>
+		</key>
+
+		<key name="device">
+			<key_columnref>did</key_columnref>
+			<timestamp_columnref>date</timestamp_columnref>
+
+			<index name="AppId">
+				<columnref>appid</columnref>
+			</index>
+			<index name="AppIdCode">
+				<columnref>appid</columnref>
+				<columnref>code</columnref>
+			</index>
+		</key>
+
+		<key name="order">
+			<key_columnref>pay</key_columnref>
+			<timestamp_columnref>date</timestamp_columnref>
+			<keyop default="COUNT,UNION">
+				<op>SUM</op>
+				<op>MAX</op>
+				<op>MIN</op>
+				<op></op>
+			</keyop>
+
+			<index name="AppId">
+				<columnref>appid</columnref>
+			</index>
+			<index name="AppIdCode">
+				<columnref>appid</columnref>
+				<columnref>code</columnref>
+			</index>
+		</key>
+	</table>
+
+	<table name="RTCount_demo">
+		<column_terminated>,</column_terminated>
+		<line_terminated>\n</line_terminated>
+		<column>key</column>
+		<column>timestamp</column>
+		<column>key2</column>
+		<column>clm1</column>
+		<column>clm2</column>
+		<column>clm3</column>
+
+		<key name="demo_mini">
+			<key_columnref>key</key_columnref>
+			<timestamp_columnref>timestamp</timestamp_columnref>
+			<index name="index_1">
+				<columnref>clm1</columnref>
+				<columnref>clm3</columnref>
+			</index>
+		</key>
+
+		<key name="demo_full">
+			<key_columnref>key2</key_columnref>
+<!-- timestamp_columnref must be timestamp format like [1472649684] -->
+			<timestamp_columnref>timestamp</timestamp_columnref>
+
+			<keyop> <!-- Options default "COUNT,UNION" -->
+				<op>COUNT</op>
+				<op>UNION</op>
+				<op>SUM</op> <!-- [SUM/MAX/MIN] only work when [key_columnref] is number-->
+				<op>MAX</op>
+				<op>MIN</op>
+			</keyop>
+
+			<timeindex> <!-- Options default "HOUR,DAY" -->
+				<tmindex>MIN</tmindex>
+				<tmindex>MIN5</tmindex>
+				<tmindex>MIN10</tmindex>
+				<tmindex>MIN30</tmindex>
+				<tmindex>HOUR</tmindex>
+				<tmindex>DAY</tmindex>
+				<tmindex>WEEK</tmindex>
+				<tmindex>WEEK2</tmindex>
+				<tmindex>MON</tmindex>
+				<tmindex>YEAR</tmindex>
+			</timeindex>
+			<index name="index_1">
+				<columnref>clm1</columnref>
+			</index>
+			<index name="index_2">
+				<columnref>clm2</columnref>
+				<columnref>clm1</columnref>
+				<columnref>clm3</columnref>
+			</index>
+		</key>
+
+	</table>
+</all>

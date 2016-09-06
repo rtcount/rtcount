@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<all>
+	<httpport>9999</httpport>
+	<kvdb> <!-- ssdb -->
+		<host>127.0.0.1</host>
+		<port>8888</port>
+		<minpoolsize>500</minpoolsize>
+		<maxpoolsize>1000</maxpoolsize>
+	</kvdb>
+	<table name="chukong_test">
+		<column_terminated>0x20</column_terminated>
+		<column>c01</column>
+		<column>c02</column>
+		<column>c03</column>
+		<column>c04</column>
+		<column>c05</column>
+		<column>c06</column>
+		<column>c07</column>
+		<column>c08</column>
+		<column>c09</column>
+
+		<column>c10</column>
+		<column>c11</column>
+		<column>c12</column>
+		<column>c13</column>
+		<column>c14</column>
+		<column>c15</column>
+		<column>c16</column>
+		<column>c17</column>
+		<column>c18</column>
+		<column>c19</column>
+
+		<column>c20</column>
+		<column>c21</column>
+		<column>c22</column>
+		<column>c23</column>
+		<column>c24</column>
+		<column>c25</column>
+		<column>c26</column>
+		<column>c27</column>
+		<column>c28</column>
+		<column>c29</column>
+
+
+		<column>c30</column>
+		<column>c31</column>
+		<column>c32</column>
+		<column>c33</column>
+		<column>c34</column>
+		<column>c35</column>
+		<column>c36</column>
+		<column>c37</column>
+		<column>c38</column>
+		<column>c39</column>
+
+		<column>c40</column>
+		<column>c41</column>
+		<column>c42</column>
+		<column>c43</column>
+		<column>c44</column>
+		<column>c45</column>
+		<column>c46</column>
+		<column>c47</column>
+		<column>c48</column>
+		<column>c49</column>
+
+		<column>c50</column>
+		<column>c51</column>
+		<column>c52</column>
+		<column>c53</column>
+		<column>c54</column>
+		<column>c55</column>
+		<column>c56</column>
+		<column>c57</column>
+		<column>c58</column>
+		<column>c59</column>
+
+		<column>c60</column>
+		<column>c61</column>
+		<column>c62</column>
+		<column>c63</column>
+		<column>c64</column>
+		<column>c65</column>
+		<key name="uuid">
+			<key_columnref>c29</key_columnref>
+			<timestamp_columnref>c03</timestamp_columnref>
+
+			<index name="AppId">
+				<columnref>c08</columnref>
+			</index>
+			<index name="Channl">
+				<columnref>c08</columnref>
+				<columnref>c10</columnref>
+			</index>
+			<index name="OS">
+				<columnref>c08</columnref>
+				<columnref>c12</columnref>
+			</index>
+		</key>
+
+		<key name="dvid">
+			<key_columnref>c48</key_columnref>
+			<timestamp_columnref>c03</timestamp_columnref>
+
+			<index name="AppId">
+				<columnref>c08</columnref>
+			</index>
+			<index name="Channl">
+				<columnref>c08</columnref>
+				<columnref>c10</columnref>
+			</index>
+			<index name="OS">
+				<columnref>c08</columnref>
+				<columnref>c12</columnref>
+			</index>
+		</key>
+	</table>
+</all>
