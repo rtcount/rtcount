@@ -31,6 +31,19 @@ curl -F data=@your_file http://ip:port/table/your_tablename
 * 查询概要统计信息
 curl http://ip:port/info
 
+##Performance
+
+    $./count chukong.xml  
+  
+    $du -h 20160907040000.log  
+    358M    20160907040000.log  
+    $curl -F d=@20160907040000.log http://127.0.0.1:9999/table/chukong_game  
+    
+    $count output  
+    /table/chukong_game  
+    handle url[/table/chukong_game],lines[614879], using[30]s
+
+
 ##Notice
 
 ##How it is done
