@@ -128,7 +128,7 @@ func rtcount_gen_index(conn *gossdb.Client, table *Table, t_key *Table_Key, strs
 			index_str += strs[val]
 
 			//store to table column of ssdb
-			s_kvkey := "iset_" + table.Name + "_" + strconv.Itoa(val)
+			s_kvkey := "set_index_" + table.Name + "_" + strconv.Itoa(val)
 			if freecache.Localcache_check_and_set(s_kvkey) == false {
 				conn.Zset(s_kvkey, strs[val], 1)
 			}
