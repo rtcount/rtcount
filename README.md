@@ -25,8 +25,8 @@ start ssdb
 * 上传单条数据:
 curl -d "your log data" http://ip:port/table/your_tablename
 
- *按文件上传:
-curl -F test=@your_file http://ip:port/table/your_tablename
+* 按文件上传:
+curl -F data=@your_file http://ip:port/table/your_tablename
 
 * 查询概要统计信息
 curl http://ip:port/info
