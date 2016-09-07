@@ -85,6 +85,10 @@
 			<key_columnref>c29</key_columnref>
 			<timestamp_columnref>c03</timestamp_columnref>
 
+			<keyop>
+				<op>UNION</op>
+			</keyop>
+
 			<index name="AppId">
 				<columnref>c08</columnref>
 			</index>
@@ -101,6 +105,10 @@
 		<key name="dvid">
 			<key_columnref>c48</key_columnref>
 			<timestamp_columnref>c03</timestamp_columnref>
+
+			<keyop>
+				<op>UNION</op>
+			</keyop>
 
 			<index name="AppId">
 				<columnref>c08</columnref>
@@ -131,8 +139,6 @@
 
 			<keyop>
 				<op>SUM</op>
-				<op>MAX</op>
-				<op>MIN</op>
 			</keyop>
 
 			<index name="AppId">
@@ -172,6 +178,10 @@
 		<key name="pdvid">
 			<key_columnref>dvid</key_columnref>
 			<timestamp_columnref>time</timestamp_columnref>
+
+			<keyop>
+				<op>UNION</op>
+			</keyop>
 
 			<index name="AppId">
 				<columnref>appKey</columnref>

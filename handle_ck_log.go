@@ -11,7 +11,7 @@ import (
 	//"time"
 )
 
-var AppList = []string{"437982673", "433400453"}
+/*var AppList = []string{"437982673", "433400453"}*/
 
 type BIPaySucc struct {
 	OrderId interface{} `json:"orderId"`
@@ -37,16 +37,18 @@ func ck_check_log(strs []string) bool {
 	if len(appKey) <= 3 {
 		return false
 	}
-	match := false
-	for _, app := range AppList {
-		if appKey == app {
-			match = true
-			break
+	/*
+		match := false
+		for _, app := range AppList {
+			if appKey == app {
+				match = true
+				break
+			}
 		}
-	}
-	if !match {
-		return false
-	}
+			if !match {
+				return false
+			}
+	*/
 	if (len(eventKey) <= 4) || (eventKey[0:3] != "cc_") {
 		return false
 	}
@@ -146,7 +148,7 @@ func CK_handle_log(tablename string, line []byte) {
 			//pay table...
 			ck_gen_pay_log(strs, strconv.Itoa(payReq.CAmount))
 		} else {
-			freecache.Localcache_setint(orderKey, int64(payReq.CAmount), 3600)
+			freecache.Localcache_set(orderKey, strconv.Itoa(payReq.CAmount), 3600)
 			return
 		}
 
