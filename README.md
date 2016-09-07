@@ -1,12 +1,13 @@
-#RTCount - 实时数据统计系统
+#RTCount - 高性能,支持多维度查询的实时统计系统
 
 
 ##Features
-* 无需代码，使用XML文件配置
-* 五种计算方式 (计数，去重，求和，最大，最小)
-* 自定义索引查询
-* 多时间维度支持
-* 自带数据接收和查询的http接口
+* 无需编写代码，通过配置即可完成功能
+* 支持五种计算方式 (计数，去重，求和，最大，最小)
+* 支持自定义索引和查询
+* 支持多维度时间
+* 自带HTTP数据查询和接收接口
+* 支持分布式部署
 
 ##Build
 ./build.sh
@@ -36,8 +37,10 @@ curl http://ip:port/info
 
 ##TODO
 * Support SQL query
+* Support system monitor and status
 * Optimize localcache to RTCount
 * Integrate SSDB to RTCount
+* 分布式部署和数据备份管理
 
 ##License
 The MIT License
