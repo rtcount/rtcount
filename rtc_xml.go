@@ -57,8 +57,8 @@ type Index struct {
 }
 
 var KEYOPS = []string{"COUNT", "UNION", "SUM", "MAX", "MIN"}
-var KEYOPS_default = []string{"COUNT", "UNION"}
-var keyopFlag_default int = UNION | COUNT
+var KEYOPS_default = []string{"UNION"}
+var keyopFlag_default int = UNION
 
 var TIMEINDEXS = []string{"MIN", "MIN5", "MIN10", "MIN30", "HOUR", "DAY", "WEEK", "WEEK2", "MON", "YEAR"}
 var TIMEINDEXS_defualt = []string{"HOUR", "DAY"}
