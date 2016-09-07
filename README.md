@@ -17,10 +17,15 @@
 ##Build
 ./build.sh
 
+##SSDB
+start ssdb
+./ssdb/ssdb-server -d ./ssdb/ssdb.conf
+
 
 ##API
 上传单条数据
 curl -d "your log data" http://ip:port/table/your_tablename
+
 按文件上传
 curl -F test=@your_file http://ip:port/table/your_tablename
 
