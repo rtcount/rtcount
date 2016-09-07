@@ -26,7 +26,7 @@ func Localcache_cache_is_big(k string, v int64) bool {
 	cache_int := localcache_getint(k)
 	if cache_int == -1 {
 		//don't find the k in localcache, we should search in ssdb
-		localcache_setint(k, v)
+		Localcache_setint(k, v, 120)
 		return false
 	}
 
@@ -34,7 +34,7 @@ func Localcache_cache_is_big(k string, v int64) bool {
 		return true
 	}
 
-	localcache_setint(k, v)
+	Localcache_setint(k, v, 120)
 	return false
 	//set max int to local cache
 }
@@ -44,7 +44,7 @@ func Localcache_cache_is_small(k string, v int64) bool {
 	cache_int := localcache_getint(k)
 	if cache_int == -1 {
 		//don't find the k in localcache, we should search in ssdb
-		localcache_setint(k, v)
+		Localcache_setint(k, v, 120)
 		return false
 	}
 
@@ -52,14 +52,23 @@ func Localcache_cache_is_small(k string, v int64) bool {
 		return true
 	}
 
-	localcache_setint(k, v)
+	Localcache_setint(k, v, 120)
 	return false
 	//set max int to local cache
 }
 
-func localcache_set(k string, v string) {
+func Localcache_set(k string, v string, expireSeconds int) {
 	//return
-	G_cache.Set([]byte(k), []byte(v), 120)
+	G_cache.Set([]byte(k), []byte(v), 3600)
+}
+
+func Localcache_del(k string) bool {
+	//return
+	return G_cache.Del([]byte(k))
+}
+func Localcache_get(k string) (value []byte, err error) {
+	//return
+	return G_cache.Get([]byte(k))
 }
 
 func localcache_getint(k string) int64 {
@@ -77,10 +86,10 @@ func localcache_getint(k string) int64 {
 	return x
 }
 
-func localcache_setint(k string, v int64) {
+func Localcache_setint(k string, v int64, expireSeconds int) {
 	//return
 	v_buf := bytes.NewBuffer([]byte{})
 	binary.Write(v_buf, binary.BigEndian, v)
 
-	G_cache.Set([]byte(k), v_buf.Bytes(), 120)
+	G_cache.Set([]byte(k), v_buf.Bytes(), expireSeconds)
 }
