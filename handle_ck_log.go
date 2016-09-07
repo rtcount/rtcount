@@ -11,6 +11,8 @@ import (
 	//"time"
 )
 
+var AppList = []string{"437982673", "433400453"}
+
 type BIPaySucc struct {
 	OrderId interface{} `json:"orderId"`
 }
@@ -35,18 +37,16 @@ func ck_check_log(strs []string) bool {
 	if len(appKey) <= 3 {
 		return false
 	}
-	/*
-		match = false
-		for _, app := range this.AppList {
-			if appKey == app {
-				match = true
-				break
-			}
+	match := false
+	for _, app := range AppList {
+		if appKey == app {
+			match = true
+			break
 		}
-		if !match {
-			continue
-		}
-	*/
+	}
+	if !match {
+		return false
+	}
 	if (len(eventKey) <= 4) || (eventKey[0:3] != "cc_") {
 		return false
 	}

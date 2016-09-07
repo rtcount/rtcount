@@ -22,8 +22,8 @@ func Rtc_StartWebServer(rtc_conf *RTC_Conf) {
 
 	http.HandleFunc("/info", info)
 
-	http.HandleFunc("/table/test", httpdata)
-	http.HandleFunc("/table/ddd", httpdata)
+	//	http.HandleFunc("/table/test", httpdata)
+	//	http.HandleFunc("/table/ddd", httpdata)
 
 	err := http.ListenAndServe(":"+rtc_conf.Port, nil)
 
