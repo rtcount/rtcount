@@ -7,7 +7,7 @@
 		<minpoolsize>500</minpoolsize>
 		<maxpoolsize>1000</maxpoolsize>
 	</kvdb>
-	<table name="chukong_test">
+	<table name="chukong_game">
 		<column_terminated>0x20</column_terminated>
 		<column>c01</column>
 		<column>c02</column>
@@ -114,5 +114,77 @@
 				<columnref>c12</columnref>
 			</index>
 		</key>
+	</table>
+	<table name="chukong_pay">
+		<column_terminated>0x20</column_terminated>
+		<column>dvid</column>
+		<column>uuid</column>
+		<column>time</column>
+		<column>channel</column>
+		<column>appKey</column>
+		<column>os</column>
+		<column>pay_mount</column>
+
+		<key name="pmount">
+			<key_columnref>pay_mount</key_columnref>
+			<timestamp_columnref>time</timestamp_columnref>
+
+			<keyop>
+				<op>SUM</op>
+				<op>MAX</op>
+				<op>MIN</op>
+			</keyop>
+
+			<index name="AppId">
+				<columnref>appKey</columnref>
+			</index>
+			<index name="Channl">
+				<columnref>appKey</columnref>
+				<columnref>channel</columnref>
+			</index>
+			<index name="OS">
+				<columnref>os</columnref>
+				<columnref>appKey</columnref>
+			</index>
+		</key>
+
+		<key name="puuid">
+			<key_columnref>dvid</key_columnref>
+			<timestamp_columnref>time</timestamp_columnref>
+
+			<keyop>
+				<op>UNION</op>
+			</keyop>
+
+			<index name="AppId">
+				<columnref>appKey</columnref>
+			</index>
+			<index name="Channl">
+				<columnref>appKey</columnref>
+				<columnref>channel</columnref>
+			</index>
+			<index name="OS">
+				<columnref>os</columnref>
+				<columnref>appKey</columnref>
+			</index>
+		</key>
+
+		<key name="pdvid">
+			<key_columnref>dvid</key_columnref>
+			<timestamp_columnref>time</timestamp_columnref>
+
+			<index name="AppId">
+				<columnref>appKey</columnref>
+			</index>
+			<index name="Channl">
+				<columnref>appKey</columnref>
+				<columnref>channel</columnref>
+			</index>
+			<index name="OS">
+				<columnref>os</columnref>
+				<columnref>appKey</columnref>
+			</index>
+		</key>
+
 	</table>
 </all>

@@ -1,6 +1,7 @@
 package main
 
 import (
+	//"./seefan/gossdb"
 	"bufio"
 	"bytes"
 	"fmt"
@@ -12,32 +13,108 @@ import (
 )
 
 func Rtc_StartWebServer(rtc_conf *RTC_Conf) {
-	//func Rtc_StartWebServer() {
 	fmt.Println("HttpServer start!")
 
-	//第一个参数为客户端发起http请求时的接口名，第二个参数是一个func，负责处理这个请求。
 	http.HandleFunc("/query", query)
 	for _, table := range rtc_conf.Table {
 		http.HandleFunc("/table/"+table.Name, httpdata)
 	}
 
-	//			err := http.ListenAndServe(":"+rtc_conf, nil)
+	http.HandleFunc("/info", info)
 
 	http.HandleFunc("/table/test", httpdata)
 	http.HandleFunc("/table/ddd", httpdata)
 
 	err := http.ListenAndServe(":"+rtc_conf.Port, nil)
-	//err := http.ListenAndServe(":9999", nil)
 
 	if err != nil {
 		fmt.Println("ListenAndServe error: ", err.Error())
 	}
 }
 
+func info(w http.ResponseWriter, req *http.Request) {
+
+	conn, err := dbpoll.NewClient()
+	if err != nil {
+		time.Sleep(1)
+		conn, err = dbpoll.NewClient()
+		if err != nil {
+			fmt.Println("Failed to create new client:", err)
+			return
+		}
+	}
+	defer conn.Close()
+
+	/*
+	   table: table_name
+	   key: key_name  ALL OP num: count()
+	   key: key_name  ALL OP num: count()
+	*/
+	var rtc_server_info string
+	for _, table := range g_rtc_conf.Table {
+		rtc_server_info += "Table: " + table.Name + "<br>"
+		for _, t_key := range table.Keys {
+
+			rtc_server_info += "KEY: " + t_key.Name + "<br>"
+			opkey := t_key.keyopFlag
+			if opkey&COUNT == COUNT {
+				kvkey := "c_" + table.Name + "_" + t_key.Name + "_a_a"
+				if res, err := conn.Get(kvkey); err == nil {
+					rtc_server_info += " COUNT[ " + res.String() + " ]"
+				} else {
+					rtc_server_info += " COUNT[ 0 ]"
+				}
+			}
+
+			if opkey&UNION == UNION {
+				kvkey := "n_" + table.Name + "_" + t_key.Name + "_a_a"
+				if res, err := conn.Get(kvkey); err == nil {
+					rtc_server_info += " UNION[ " + res.String() + " ]"
+				} else {
+					rtc_server_info += " UNION[ 0 ]"
+				}
+			}
+
+			if opkey&SUM == SUM {
+				kvkey := "s_" + table.Name + "_" + t_key.Name + "_a_a"
+				if res, err := conn.Get(kvkey); err == nil {
+					rtc_server_info += " SUM[ " + res.String() + " ]"
+				} else {
+					rtc_server_info += " SUM[ 0 ]"
+				}
+			}
+
+			if opkey&MAX == MAX {
+				kvkey := "max_" + table.Name + "_" + t_key.Name + "_a_a"
+				if res, err := conn.Get(kvkey); err == nil {
+					rtc_server_info += " MAX[ " + res.String() + " ]"
+				} else {
+					rtc_server_info += " MAX[ 0 ]"
+				}
+			}
+
+			if opkey&MIN == MIN {
+				kvkey := "min_" + table.Name + "_" + t_key.Name + "_a_a"
+				if res, err := conn.Get(kvkey); err == nil {
+					rtc_server_info += " MIN[ " + res.String() + " ]"
+				} else {
+					rtc_server_info += " MIN[ 0 ]"
+				}
+			}
+			rtc_server_info += " <br>"
+		}
+	}
+
+	fmt.Fprint(w, rtc_server_info)
+}
+
 func query(w http.ResponseWriter, req *http.Request) {
 	//fmt.Println(req)
 
-	fmt.Println(req.URL)
+	if req.ContentLength == 0 {
+		fmt.Fprint(w, "no query data")
+		return
+	}
 
 	fmt.Fprint(w, "ok")
 }
@@ -61,6 +138,11 @@ func p_byteString(p []byte) string {
 var cou int = 0
 
 func WebDataHandle(tablename string, line []byte) {
+
+	if tablename == "chukong_game" {
+		CK_handle_log(tablename, line)
+		return
+	}
 
 	cou++
 	//fmt.Printf("----[%d]------------\n", cou)
