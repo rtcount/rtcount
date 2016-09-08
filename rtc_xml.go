@@ -11,6 +11,7 @@ import (
 type RTC_Conf struct {
 	XMLName xml.Name `xml:"all"`
 	Port    string   `xml:"httpport"`
+	TcpPort string   `xml:"tcpport"`
 	Table   []Table  `xml:"table"`
 	Kvdb    KVDB     `xml:"kvdb"`
 }

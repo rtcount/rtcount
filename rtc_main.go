@@ -467,5 +467,6 @@ func main() {
 
 	freecache.Localcache_cache_init(1024 * 10240)
 
-	Rtc_StartWebServer(&g_rtc_conf)
+	go Rtc_StartWebServer(&g_rtc_conf)
+	Rtc_StartTcpServer(&g_rtc_conf)
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <all>
 	<httpport>9999</httpport>
+	<tcpport>9998</tcpport>
 	<kvdb> <!-- ssdb -->
 		<host>127.0.0.1</host>
 		<port>8888</port>

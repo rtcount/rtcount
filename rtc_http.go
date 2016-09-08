@@ -180,10 +180,10 @@ func httpdata(w http.ResponseWriter, req *http.Request) {
 
 	//7 == len("/table/")
 	tablename := url[7:len(url)]
-	fmt.Println(tablename)
-	fmt.Println(req.RequestURI)
+	//fmt.Println(tablename)
+	//fmt.Println(req.RequestURI)
 
-	start := time.Now().Unix()
+	//start := time.Now().Unix()
 
 	scanner := bufio.NewScanner(req.Body)
 	var linenum int = 0
@@ -202,9 +202,9 @@ func httpdata(w http.ResponseWriter, req *http.Request) {
 	req.Body.Close()
 	//fmt.Printf("%s\n", result)
 
-	end := time.Now().Unix()
+	//end := time.Now().Unix()
 
-	fmt.Printf("handle url[%s],lines[%d], using[%d]s\n", url, linenum, (end - start))
+	//fmt.Printf("handle url[%s],lines[%d], using[%d]s\n", url, linenum, (end - start))
 
 	fmt.Fprint(w, "ok")
 }
