@@ -17,6 +17,16 @@ const (
 	MIN   = 1 << 4
 )
 
+/* setting ssdb key pre values */
+const (
+	PRE_KEYSET       = "set_"
+	PRE_NEW_KEYOP    = "new_"
+	PRE_ACTIVE_KEYOP = "act_"
+	PRE_SUM_KEYOP    = "sum_"
+	PRE_MAX_KEYOP    = "max_"
+	PRE_MIN_KEYOP    = "min_"
+)
+
 func rtcount_gen_dates(timestmp int64, t_key *Table_Key) []string {
 
 	date_map := make(map[string]string)
@@ -171,11 +181,11 @@ func rtcount_core_count(conn *gossdb.Client, kv_pre string, key string, dates []
 }
 
 func rtcount_core_union(conn *gossdb.Client, kv_pre string, key string, dates []string, indexs []string) {
-	var key_set_pre string = "set_"
+	var key_set_pre string = PRE_KEYSET
 	var op_key_pre string
 
 	//-----handle new op-----------------------------------------------------------------------------
-	op_key_pre = "n_" + kv_pre
+	op_key_pre = PRE_NEW_KEYOP + kv_pre
 	for _, indx_val := range indexs {
 		s_kvkey := key_set_pre + op_key_pre + "_a" + "_" + indx_val
 		//check localcace first
@@ -202,7 +212,7 @@ func rtcount_core_union(conn *gossdb.Client, kv_pre string, key string, dates []
 	}
 
 	//-----handle active op-----------------------------------------------------------------------------
-	op_key_pre = "ac_" + kv_pre
+	op_key_pre = PRE_ACTIVE_KEYOP + kv_pre
 	for _, indx_val := range indexs {
 		t_len := len(dates)
 		for t := 0; t < t_len; t++ {
@@ -242,7 +252,7 @@ func rtcount_core_union(conn *gossdb.Client, kv_pre string, key string, dates []
 }
 
 func rtcount_core_sum(conn *gossdb.Client, kv_pre string, key_int int64, dates []string, indexs []string) {
-	var op_key_pre string = "s_" + kv_pre
+	var op_key_pre string = PRE_SUM_KEYOP + kv_pre
 
 	for _, indx_val := range indexs {
 		for _, date_val := range dates {
@@ -254,7 +264,7 @@ func rtcount_core_sum(conn *gossdb.Client, kv_pre string, key_int int64, dates [
 }
 
 func rtcount_core_max(conn *gossdb.Client, kv_pre string, key_int int64, dates []string, indexs []string) {
-	var op_key_pre string = "max_" + kv_pre
+	var op_key_pre string = PRE_MAX_KEYOP + kv_pre
 
 	for _, indx_val := range indexs {
 		for _, date_val := range dates {
@@ -274,7 +284,7 @@ func rtcount_core_max(conn *gossdb.Client, kv_pre string, key_int int64, dates [
 }
 
 func rtcount_core_min(conn *gossdb.Client, kv_pre string, key_int int64, dates []string, indexs []string) {
-	var op_key_pre string = "min_" + kv_pre
+	var op_key_pre string = PRE_MIN_KEYOP + kv_pre
 
 	for _, indx_val := range indexs {
 		for _, date_val := range dates {
