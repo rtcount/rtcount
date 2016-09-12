@@ -171,7 +171,6 @@ func rtcount_core_count(conn *gossdb.Client, kv_pre string, key string, dates []
 }
 
 func rtcount_core_union(conn *gossdb.Client, kv_pre string, key string, dates []string, indexs []string) {
-	var i_len int = len(indexs)
 	var key_set_pre string = "set_"
 	var op_key_pre string
 
@@ -204,13 +203,13 @@ func rtcount_core_union(conn *gossdb.Client, kv_pre string, key string, dates []
 
 	//-----handle active op-----------------------------------------------------------------------------
 	op_key_pre = "ac_" + kv_pre
-	for i := 0; i < i_len; i++ {
+	for _, indx_val := range indexs {
 		t_len := len(dates)
 		for t := 0; t < t_len; t++ {
 			if dates[t] == "a" {
 				continue //"ALL" don't need to cale active...
 			}
-			kvkey := op_key_pre + "_" + dates[t] + "_" + indexs[i]
+			kvkey := op_key_pre + "_" + dates[t] + "_" + indx_val
 			s_kvkey := key_set_pre + kvkey
 
 			//check localcace first
@@ -225,8 +224,11 @@ func rtcount_core_union(conn *gossdb.Client, kv_pre string, key string, dates []
 			} else if exists == false {
 				//new key, insert it to set, and incr the counter.
 				//we check from big date, so remaining date must be new key.
-				for l := t; l < t_len; l++ {
-					kvkey := op_key_pre + "_" + dates[t] + "_" + indexs[i]
+				for last := t; last < t_len; last++ {
+					if dates[last] == "a" {
+						continue //"ALL" don't need to cale active...
+					}
+					kvkey := op_key_pre + "_" + dates[last] + "_" + indx_val
 					s_kvkey := key_set_pre + kvkey
 
 					conn.Zset(s_kvkey, key, 1)
