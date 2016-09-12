@@ -26,6 +26,7 @@ const (
 	PRE_SUM_KEYOP    = "sum_"
 	PRE_MAX_KEYOP    = "max_"
 	PRE_MIN_KEYOP    = "min_"
+	PRE_INDEX_KEYOP  = "index_"
 )
 
 func rtcount_gen_dates(timestmp int64, t_key *Table_Key) []string {
@@ -96,7 +97,7 @@ func rtcount_gen_indexs(conn *gossdb.Client, table *Table, t_key *Table_Key, str
 			index_str += strs[val]
 
 			//store to table column of ssdb
-			s_kvkey := "set_index_" + table.Name + "_" + strconv.Itoa(val)
+			s_kvkey := PRE_KEYSET + PRE_INDEX_KEYOP + table.Name + "_" + strconv.Itoa(val)
 			if freecache.Localcache_check_and_set(s_kvkey+strs[val]) == false {
 				conn.Zset(s_kvkey, strs[val], 1)
 			}
