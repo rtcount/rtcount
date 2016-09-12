@@ -60,7 +60,7 @@ func info(w http.ResponseWriter, req *http.Request) {
 			kv_pre := table.Name + "_" + t_key.Name
 			opkey := t_key.keyopFlag
 			if opkey&COUNT == COUNT {
-				kvkey := "c_" + kv_pre + "_a_a"
+				kvkey := PRE_COUNT_KEYOP + kv_pre + "_a_a"
 				if res, err := conn.Get(kvkey); err == nil {
 					rtc_server_info += " COUNT[ " + res.String() + " ]"
 				} else {
@@ -69,7 +69,7 @@ func info(w http.ResponseWriter, req *http.Request) {
 			}
 
 			if opkey&UNION == UNION {
-				kvkey := "n_" + kv_pre + "_a_a"
+				kvkey := PRE_NEW_KEYOP + kv_pre + "_a_a"
 				if res, err := conn.Get(kvkey); err == nil {
 					rtc_server_info += " UNION[ " + res.String() + " ]"
 				} else {
@@ -78,7 +78,7 @@ func info(w http.ResponseWriter, req *http.Request) {
 			}
 
 			if opkey&SUM == SUM {
-				kvkey := "s_" + kv_pre + "_a_a"
+				kvkey := PRE_SUM_KEYOP + kv_pre + "_a_a"
 				if res, err := conn.Get(kvkey); err == nil {
 					rtc_server_info += " SUM[ " + res.String() + " ]"
 				} else {
@@ -87,7 +87,7 @@ func info(w http.ResponseWriter, req *http.Request) {
 			}
 
 			if opkey&MAX == MAX {
-				kvkey := "max_" + kv_pre + "_a_a"
+				kvkey := PRE_MAX_KEYOP + kv_pre + "_a_a"
 				if res, err := conn.Get(kvkey); err == nil {
 					rtc_server_info += " MAX[ " + res.String() + " ]"
 				} else {
@@ -96,7 +96,7 @@ func info(w http.ResponseWriter, req *http.Request) {
 			}
 
 			if opkey&MIN == MIN {
-				kvkey := "min_" + kv_pre + "_a_a"
+				kvkey := PRE_MIN_KEYOP + kv_pre + "_a_a"
 				if res, err := conn.Get(kvkey); err == nil {
 					rtc_server_info += " MIN[ " + res.String() + " ]"
 				} else {

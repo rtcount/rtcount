@@ -20,6 +20,7 @@ const (
 /* setting ssdb key pre values */
 const (
 	PRE_KEYSET       = "set_"
+	PRE_COUNT_KEYOP  = "cot_"
 	PRE_NEW_KEYOP    = "new_"
 	PRE_ACTIVE_KEYOP = "act_"
 	PRE_SUM_KEYOP    = "sum_"
@@ -168,7 +169,7 @@ func rtcount_core_table_key(conn *gossdb.Client, table *Table, t_key *Table_Key,
 }
 
 func rtcount_core_count(conn *gossdb.Client, kv_pre string, key string, dates []string, indexs []string) {
-	var op_key_pre string = "c_" + kv_pre
+	var op_key_pre string = PRE_COUNT_KEYOP + kv_pre
 	//kv_prt = table.Name + "_" + t_key.Name
 
 	for _, indx_val := range indexs {
