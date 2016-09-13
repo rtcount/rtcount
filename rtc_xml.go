@@ -36,14 +36,14 @@ type Table_Key struct {
 	ikey_columnref int    //* index number of Key_columnref in table.Column[*]
 	Ts_columnref   string `xml:"timestamp_columnref"`
 	its_columnref  int    //* index number of Ts_columnref in table.Column[*]
-	KeyOP          Keyop  `xml:"keyop"`
+	KeyOP          KeyOp  `xml:"keyop"`
 	keyopFlag      int
 	Timeindex      Timeindex `xml:"timeindex"`
 	Index          []Index   `xml:"index"`
 	max_index      int       //store the minimun length of log
 }
 
-type Keyop struct {
+type KeyOp struct {
 	Op []string `xml:"op"`
 }
 
