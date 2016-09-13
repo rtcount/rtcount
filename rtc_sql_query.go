@@ -8,65 +8,41 @@ import (
 	"strings"
 	//"io"
 	//"io/ioutil"
-	"net/http"
 	"regexp"
 	//	"time"
 )
 
-func dquery(w http.ResponseWriter, req *http.Request) {
-	//fmt.Println(req)
-
-	if req.ContentLength == 0 {
-		fmt.Fprint(w, "no query data")
-		return
-	}
-
-	var sql string
-	dparse(sql)
-
-	fmt.Fprint(w, "ok")
-}
-
-func dparse(sql string) {
-
-	sql = strings.Replace(sql, ";", "", -1)
-
-	UpSQL := strings.ToUpper(sql)
-	/*
-	   select OP from TABLE.KEY with TIME and INDEX where INDEX_Colu=xxx and time <=123 and time>zxc;
-	*/
-	s := strings.Fields(UpSQL)
-	fmt.Println(s)
-
-	t_len := len(s)
-	for i := 0; i < t_len; i++ {
-		fmt.Print("---[", s[i], "]\n")
-	}
-
-	//	var OP, Table, Key, Time, Index string
-
-	//	OP = 1
-
-}
-
 func test_pars() {
-	sql := "  select SUM from demo.demo_mini with MIN and index_1 where INDEX_Colu=xxx and time <=123 and time>zxc;  ;"
+	sql := "select SUM from demo.demo_mini with MIN and index_1 where INDEX_Colu =xxx and time <=123 and time >= zxc and time > zxc;;  ;"
 	//过滤 ';'
 	sql = strings.Replace(sql, ";", "", -1)
 	//过滤前后的空格
 	sql = strings.TrimSpace(sql)
-
 	//全部转换为大写
 	sql = strings.ToUpper(sql)
 
-	//fmt.Println(sql)
+	/*
+			var myExp = myRegexp{regexp.MustCompile(`SELECT (?P<op>.*) FROM (?P<table_key>.*) WITH (?P<time_index>.*) WHERE (?P<where>.*)`)}
+			mmap := myExp.FindStringSubmatchMap(sql)
 
+			ww := mmap["op"]
+			wm := mmap["table_key"]
+			w1 := mmap["time_index"]
+			w2 := mmap["where"]
+			fmt.Println(mmap)
+
+		fmt.Println(ww)
+		fmt.Println(wm)
+		fmt.Println(w1)
+		fmt.Println(w2)
+	*/
+
+	//fmt.Println(sql)
 	ret, OP := getSubStringBw(sql, "SELECT", "FROM")
 	if ret == false {
 		fmt.Println("OP error", OP)
 		return
 	}
-
 	//fmt.Println(OP)
 
 	ret, TABLE_KEY := getSubStringBw(sql, "FROM", "WITH")
@@ -84,10 +60,7 @@ func test_pars() {
 	where := strings.Split(sql, " WHERE ")[1]
 	//	fmt.Println(where)
 
-	and := strings.Split(where, " AND ")
-	//	fmt.Println(and)
-
-	ret, err_msg := checkParam(OP, TABLE_KEY, TIME_INDEX, and)
+	ret, err_msg := checkParam(OP, TABLE_KEY, TIME_INDEX, where)
 	if ret == false {
 
 		fmt.Println("errmse", err_msg)
@@ -183,7 +156,48 @@ func checkTableKey(TABLE_KEY string, TABLE *string, KEY *string, t_key **Table_K
 	return true, "OK"
 }
 
-func checkWhere(where []string, i_Index *Index) (bool, string) {
+//embed regexp.Regexp in a new type so we can extend it
+type myRegexp struct {
+	*regexp.Regexp
+}
+
+//add a new method to our new regular expression type
+func (r *myRegexp) FindStringSubmatchMap(s string) map[string]string {
+	captures := make(map[string]string)
+
+	match := r.FindStringSubmatch(s)
+	if match == nil {
+		return captures
+	}
+
+	for i, name := range r.SubexpNames() {
+		//Ignore the whole regexp match and unnamed groups
+		if i == 0 || name == "" {
+			continue
+		}
+
+		captures[name] = match[i]
+
+	}
+	return captures
+}
+
+func checkWhere(where string, i_Index *Index) (bool, string) {
+
+	and := strings.Split(where, " AND ")
+	fmt.Println(and)
+
+	for _, val := range and {
+		var myExp = myRegexp{regexp.MustCompile(`(?P<k>.*)(>=|<=|[^<>]=|[^=]>|[^=]<)(?P<v>.*)`)}
+		mmap := myExp.FindStringSubmatchMap(val)
+		ww := mmap["k"]
+		wm := mmap["v"]
+
+		//fmt.Println(mmap)
+		fmt.Println(ww)
+		fmt.Println(wm)
+	}
+
 	/*
 		var TIME1, TIME2 string
 		for _, val := range where {
@@ -196,7 +210,7 @@ func checkWhere(where []string, i_Index *Index) (bool, string) {
 	return true, "OK"
 }
 
-func checkParam(OP string, TABLE_KEY string, TIME_INDEX string, where []string) (bool, string) {
+func checkParam(OP string, TABLE_KEY string, TIME_INDEX string, where string) (bool, string) {
 
 	var TABLE, KEY, TIME, INDEX string
 	var i_Index *Index
