@@ -141,12 +141,14 @@ var cou int = 0
 
 func WebDataHandle(tablename string, line []byte) {
 
+	cou++
+	//fmt.Printf("----[%d]------------\n", cou)
+
 	if tablename == "chukong_game" {
 		CK_handle_log(tablename, line)
 		return
 	}
 
-	cou++
 	//fmt.Printf("----[%d]------------\n", cou)
 	//fmt.Printf("old:%s\n", p_byteString(line))
 

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <all>
 	<httpport>9999</httpport>
-	<tcpport>9998</tcpport>
 	<kvdb> <!-- ssdb -->
 		<host>127.0.0.1</host>
 		<port>8888</port>
@@ -9,6 +8,7 @@
 		<maxpoolsize>1000</maxpoolsize>
 	</kvdb>
 	<table name="chukong_game">
+		<tcpport>9998</tcpport>
 		<column_terminated>0x20</column_terminated>
 		<column>c01</column>
 		<column>c02</column>

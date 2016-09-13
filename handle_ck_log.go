@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	//"time"
+	"time"
 )
 
 /*var AppList = []string{"437982673", "433400453"}*/
@@ -76,6 +76,9 @@ func ck_check_log(strs []string) bool {
 	if len(channel) != 6 {
 		strs[9] = "999998" // unkown channel
 	}
+
+	//change time to now time
+	strs[2] = fmt.Sprintf("%d", time.Now().Unix())
 
 	return true
 }

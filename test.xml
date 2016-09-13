@@ -8,6 +8,7 @@
 		<maxpoolsize>1000</maxpoolsize>
 	</kvdb>
 	<table name="test_game">
+		<tcpport>9997</tcpport>
 		<column_terminated>,</column_terminated>
 		<line_terminated>;</line_terminated>
 		<column>date</column>
@@ -79,6 +80,7 @@
 	</table>
 
 	<table name="RTCount_demo">
+		<tcpport>9998</tcpport>
 		<column_terminated>,</column_terminated>
 		<line_terminated>\n</line_terminated>
 		<column>key</column>
