@@ -10,27 +10,29 @@
 * 支持分布式部署
 
 ##Build
-./build.sh
+    ./build.sh
 
 ##Example Usage
 1. write your.xml 
 2. ./count your.xml  
 
-##SSDB
-start ssdb
-./ssdb/ssdb-server -d ./ssdb/ssdb.conf
-
+##Start SSDB
+    ./ssdb/ssdb-server -d ./ssdb/ssdb.conf
+    
 
 ##API
 * 上传单条数据:
-curl -d "your log data" http://ip:port/table/your_tablename
 
+    curl -d "your log data" http://ip:port/table/your_tablename
+    
 * 按文件上传:
-curl -F data=@your_file http://ip:port/table/your_tablename
 
+    curl -F data=@your_file http://ip:port/table/your_tablename
+    
 * 查询概要统计信息
-curl http://ip:port/info
 
+    curl http://ip:port/info
+    
 ##Performance
 
     $./count chukong.xml  
