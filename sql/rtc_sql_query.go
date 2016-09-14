@@ -9,17 +9,19 @@ import (
 	//"io"
 	//"io/ioutil"
 	"regexp"
+	//"sort"
 	//	"time"
 )
 
 func test_pars() {
-	sql := "select SUM from demo.demo_mini with MIN and index_1 where INDEX_Colu =xxx and time <=123 and time >= zxc and time > zxc;;  ;"
+	ori_sql := "select SUM from demo.demo_mini with MIN and index_1 WHERE clm1 =clm1 and 1clm3 =c1lm3 and time <=123 and time >= zxc and  clm2 =clm2;;  ;"
 	//过滤 ';'
-	sql = strings.Replace(sql, ";", "", -1)
+	ori_sql = strings.Replace(ori_sql, ";", "", -1)
+
 	//过滤前后的空格
-	sql = strings.TrimSpace(sql)
-	//全部转换为大写
-	sql = strings.ToUpper(sql)
+	ori_sql = strings.TrimSpace(ori_sql)
+	//全部转换为小写
+	sql := strings.ToLower(ori_sql)
 
 	/*
 			var myExp = myRegexp{regexp.MustCompile(`SELECT (?P<op>.*) FROM (?P<table_key>.*) WITH (?P<time_index>.*) WHERE (?P<where>.*)`)}
@@ -38,26 +40,26 @@ func test_pars() {
 	*/
 
 	//fmt.Println(sql)
-	ret, OP := getSubStringBw(sql, "SELECT", "FROM")
+	ret, OP := getSubStringBw(sql, "select", "from")
 	if ret == false {
 		fmt.Println("OP error", OP)
 		return
 	}
 	//fmt.Println(OP)
 
-	ret, TABLE_KEY := getSubStringBw(sql, "FROM", "WITH")
+	ret, TABLE_KEY := getSubStringBw(sql, "from", "with")
 	if ret == false {
 		fmt.Println("TABLE error", TABLE_KEY)
 		return
 	}
 
-	ret, TIME_INDEX := getSubStringBw(sql, "WITH", "WHERE")
+	ret, TIME_INDEX := getSubStringBw(sql, "with", "where")
 	if ret == false {
 		fmt.Println("WITH error", TIME_INDEX)
 		return
 	}
 
-	where := strings.Split(sql, " WHERE ")[1]
+	where := strings.Split(sql, " where ")[1]
 	//	fmt.Println(where)
 
 	ret, err_msg := checkParam(OP, TABLE_KEY, TIME_INDEX, where)
@@ -83,7 +85,7 @@ func checkOP(OP string, t_key *Table_Key) (bool, string) {
 }
 
 func checkTimeIndex(TIME_INDEX string, TIME *string, INDEX *string, i_Index **Index, t_key *Table_Key) (bool, string) {
-	strs := strings.Split(TIME_INDEX, " AND ")
+	strs := strings.Split(TIME_INDEX, " and ")
 
 	if GetIndexInArrayByString(strs[0], TIMEINDEXS) == -1 {
 		if GetIndexInArrayByString(strs[1], TIMEINDEXS) == -1 {
@@ -105,7 +107,7 @@ func checkTimeIndex(TIME_INDEX string, TIME *string, INDEX *string, i_Index **In
 	//检测索引是否在当前KEY里设置了
 	match := false
 	for _, indx := range t_key.Index {
-		if strings.ToUpper(indx.Name) == *INDEX {
+		if indx.Name == *INDEX {
 			match = true
 			*i_Index = &indx
 			break
@@ -117,7 +119,7 @@ func checkTimeIndex(TIME_INDEX string, TIME *string, INDEX *string, i_Index **In
 	return true, "OK"
 }
 
-func checkTableKey(TABLE_KEY string, TABLE *string, KEY *string, t_key **Table_Key) (bool, string) {
+func checkTableKey(TABLE_KEY string, TABLE *string, KEY *string, t_key **Table_Key, table **Table) (bool, string) {
 	strs := strings.Split(TABLE_KEY, ".")
 	if len(strs) != 2 {
 		return false, "The TABLE_KET[" + TABLE_KEY + "] not error"
@@ -125,13 +127,12 @@ func checkTableKey(TABLE_KEY string, TABLE *string, KEY *string, t_key **Table_K
 	*TABLE = strs[0]
 	*KEY = strs[1]
 
-	var table *Table
 	match := false
 	//查找配置文件里是否有指定的表名
 	for _, t_val := range g_rtc_conf.Table {
-		if strings.ToUpper(t_val.Name) == *TABLE {
+		if t_val.Name == *TABLE {
 			match = true
-			table = &t_val
+			*table = &t_val
 			break
 		}
 	}
@@ -142,8 +143,8 @@ func checkTableKey(TABLE_KEY string, TABLE *string, KEY *string, t_key **Table_K
 
 	match = false
 	//查找表中是否有这个KEY
-	for _, key_v := range table.Keys {
-		if strings.ToUpper(key_v.Name) == *KEY {
+	for _, key_v := range (*table).Keys {
+		if key_v.Name == *KEY {
 			match = true
 			*t_key = &key_v
 			break
@@ -182,21 +183,92 @@ func (r *myRegexp) FindStringSubmatchMap(s string) map[string]string {
 	return captures
 }
 
-func checkWhere(where string, i_Index *Index) (bool, string) {
+type whereItem struct {
+	name        string
+	op          string
+	value       string
+	i_columnref int
+}
 
-	and := strings.Split(where, " AND ")
+func checkWhere(where string, i_Index *Index, table *Table) (bool, string) {
+
+	and := strings.Split(where, " and ")
 	fmt.Println(and)
 
-	for _, val := range and {
-		var myExp = myRegexp{regexp.MustCompile(`(?P<k>.*)(>=|<=|[^<>]=|[^=]>|[^=]<)(?P<v>.*)`)}
-		mmap := myExp.FindStringSubmatchMap(val)
-		ww := mmap["k"]
-		wm := mmap["v"]
+	//key_value := make(map[string]string)
+	var whereList []whereItem
+	var whereTimeList []whereItem
 
-		//fmt.Println(mmap)
-		fmt.Println(ww)
-		fmt.Println(wm)
+	for _, val := range and {
+		var myExp = myRegexp{regexp.MustCompile(`(?P<k>.*)(?P<op>>=|<=|[^<>]=|[^=]>|[^=]<)(?P<v>.*)`)}
+		mmap := myExp.FindStringSubmatchMap(val)
+
+		var item whereItem
+		item.name = strings.TrimSpace(mmap["k"])
+		item.op = strings.TrimSpace(mmap["op"])
+		item.value = strings.TrimSpace(mmap["v"])
+		item.i_columnref = -1
+		if item.name == "time" {
+			whereTimeList = append(whereTimeList, item)
+		} else {
+			whereList = append(whereList, item)
+		}
 	}
+
+	fmt.Println(whereList)
+	fmt.Println(whereTimeList)
+
+	if len(whereTimeList) > 2 {
+		return false, "Two many TIME near where"
+	}
+
+	l_len := len(whereList)
+	//过滤索引列和操作值
+	for i := 0; i < l_len; i++ {
+		index_column := GetIndexInArrayByString(whereList[i].name, i_Index.Columnref)
+		if index_column == -1 {
+			return false, "There is a error with [" + whereList[i].name + "] near where "
+		}
+		whereList[i].i_columnref = GetIndexInArrayByString(whereList[i].name, table.Column)
+
+		if whereList[i].op != "=" {
+			return false, "The index column [" + whereList[i].name + "] just support '=' OP near where "
+		}
+	}
+
+	//检测索引列是否重复
+
+	var whereNameList []string
+	for _, val := range whereList {
+		if GetIndexInArrayByString(val.name, whereNameList) != -1 {
+			return false, "The index column [" + val.name + "] repeat near where "
+		}
+		whereNameList = append(whereNameList, val.name)
+	}
+
+	//检测索引列数目缺少的
+	for _, column := range i_Index.Columnref {
+		if GetIndexInArrayByString(column, whereNameList) == -1 {
+			return false, "Miss index column [" + column + "] in where "
+		}
+	}
+
+	//产生index索引key
+	var index_str string
+	//indx.i_columnref已经被sort过了，所以这里使用range，其顺序是固定的
+	for _, val := range i_Index.i_columnref {
+		fmt.Println("\n", val, "\n")
+		for _, item := range whereList {
+			if val == item.i_columnref {
+				index_str += item.value
+				fmt.Println("\n", item.value, "\n")
+			}
+		}
+	}
+	fmt.Println(whereList)
+	fmt.Println(index_str)
+
+	//fmt.Println(key_value)
 
 	/*
 		var TIME1, TIME2 string
@@ -213,10 +285,11 @@ func checkWhere(where string, i_Index *Index) (bool, string) {
 func checkParam(OP string, TABLE_KEY string, TIME_INDEX string, where string) (bool, string) {
 
 	var TABLE, KEY, TIME, INDEX string
+	var table *Table
 	var i_Index *Index
 	var t_key *Table_Key
 
-	ret, err_msg := checkTableKey(TABLE_KEY, &TABLE, &KEY, &t_key)
+	ret, err_msg := checkTableKey(TABLE_KEY, &TABLE, &KEY, &t_key, &table)
 	if ret == false {
 		return ret, err_msg
 	}
@@ -231,7 +304,7 @@ func checkParam(OP string, TABLE_KEY string, TIME_INDEX string, where string) (b
 		return ret, err_msg
 	}
 
-	ret, err_msg = checkWhere(where, i_Index)
+	ret, err_msg = checkWhere(where, i_Index, table)
 	if ret == false {
 		return ret, err_msg
 	}
