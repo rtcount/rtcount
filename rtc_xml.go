@@ -57,12 +57,12 @@ type Index struct {
 	i_columnref []int    //* index number of Columnref in table.Column[*]
 }
 
-var KEYOPS = []string{"COUNT", "UNION", "SUM", "MAX", "MIN"}
-var KEYOPS_default = []string{"UNION"}
+var KEYOPS = []string{"count", "union", "sum", "max", "min"}
+var KEYOPS_default = []string{"union"}
 var keyopFlag_default int = UNION
 
-var TIMEINDEXS = []string{"MIN", "MIN5", "MIN10", "MIN30", "HOUR", "DAY", "WEEK", "WEEK2", "MON", "YEAR"}
-var TIMEINDEXS_defualt = []string{"HOUR", "DAY"}
+var TIMEINDEXS = []string{"min", "min5", "min10", "min30", "hour", "day", "week", "week2", "mon", "year"}
+var TIMEINDEXS_defualt = []string{"hour", "day"}
 
 func RTC_conf_GetTableByName(tablename string, rtc_conf *RTC_Conf) *Table {
 	t_len := len(rtc_conf.Table)
@@ -88,12 +88,12 @@ func GetIndexInArrayByString(item string, arr []string) int {
 
 func SortTimeIndexArray(arr []string) (ret []string) {
 
-	//{"MIN", "MIN5", "MIN10", "MIN30", "HOUR", "DAY", "WEEK", "WEEK2", "MON", "YEAR"}
+	//{"min", "min5", "min10", "min30", "hour", "day", "week", "week2", "mon", "year"}
 	tm_size := len(TIMEINDEXS)
 	for i := tm_size - 1; i >= 0; i-- {
 		for _, val := range arr {
 			if val == TIMEINDEXS[i] {
-				ret = append(ret, strings.ToUpper(val))
+				ret = append(ret, strings.ToLower(val))
 			}
 		} //end for range arr
 	} //end for TIMEINDEXS
@@ -103,12 +103,13 @@ func SortTimeIndexArray(arr []string) (ret []string) {
 
 func ArrayFilterAndFormat(arr []string) (ret []string) {
 
-	for _, val := range arr {
-		if len(val) == 0 || GetIndexInArrayByString(strings.ToUpper(val), ret) != -1 {
+	l_ary := len(arr)
+	for i := 0; i < l_ary; i++ {
+		if len(arr[i]) == 0 || GetIndexInArrayByString(strings.ToLower(arr[i]), ret) != -1 {
 			continue
 		}
 
-		ret = append(ret, strings.ToUpper(val))
+		ret = append(ret, strings.ToLower(arr[i]))
 	}
 	/*
 		if needsort == true {
@@ -121,13 +122,20 @@ func ArrayFilterAndFormat(arr []string) (ret []string) {
 func CheckAndFix_table_key(table *Table, t_key *Table_Key) (string, bool) {
 
 	var message string
+
+	if t_key.Name == "" {
+		message := " need set a name"
+		return message, false
+	}
+
+	t_key.Name = strings.ToLower(t_key.Name)
 	//check Key and Timestamps
 	if len(t_key.Key_columnref) == 0 {
 		message = "key_columnref don't set"
 		goto Err
 	}
 
-	t_key.Key_columnref = strings.ToUpper(t_key.Key_columnref)
+	t_key.Key_columnref = strings.ToLower(t_key.Key_columnref)
 	t_key.ikey_columnref = GetIndexInArrayByString(t_key.Key_columnref, table.Column)
 	if t_key.ikey_columnref == -1 {
 		message = "key_columnref set error"
@@ -139,7 +147,7 @@ func CheckAndFix_table_key(table *Table, t_key *Table_Key) (string, bool) {
 		goto Err
 	}
 
-	t_key.Ts_columnref = strings.ToUpper(t_key.Ts_columnref)
+	t_key.Ts_columnref = strings.ToLower(t_key.Ts_columnref)
 	t_key.its_columnref = GetIndexInArrayByString(t_key.Ts_columnref, table.Column)
 	if t_key.its_columnref == -1 {
 		message = "timestamp_columnref set error"
@@ -189,7 +197,7 @@ func CheckAndFix_table_key(table *Table, t_key *Table_Key) (string, bool) {
 	t_key.Timeindex.Tm = SortTimeIndexArray(t_key.Timeindex.Tm)
 
 	/* "ALL" is an inside timeindex for all data */
-	t_key.Timeindex.Tm = append(t_key.Timeindex.Tm, "ALL")
+	t_key.Timeindex.Tm = append(t_key.Timeindex.Tm, "all")
 
 	//check index
 	if t_len := len(t_key.Index); t_len != 0 {
@@ -210,8 +218,20 @@ func CheckAndFix_table_key(table *Table, t_key *Table_Key) (string, bool) {
 					goto Err
 				}
 			}
-			//对key索引列值进行排序，这样key索引位置可以变动，而不影响其生成
-			sort.Sort(sort.IntSlice(t_key.Index[i].i_columnref))
+			/*
+				//对key索引列值进行排序，这样key索引位置可以变动，而不影响其生成
+				fmt.Println("\n*************************************\n")
+				fmt.Println(t_key.Index[i].i_columnref)
+				fmt.Println(t_key.Index[i].Columnref)
+
+				fmt.Println("\n-------------------------------------\n")
+				sort.Sort(sort.IntSlice(t_key.Index[i].i_columnref))
+				fmt.Println(t_key.Index[i].i_columnref)
+				fmt.Println("\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n")
+			*/
+			for _, val := range t_key.Index[i].i_columnref {
+				fmt.Println("\n", val, "\n")
+			}
 		}
 
 	}
@@ -224,8 +244,23 @@ Err:
 func CheckAndFix_table(table *Table) (string, bool) {
 	//fmt.Println(table)
 
-	//Upper table column
+	//Lower table column
+	if table.Name == "" {
+		message := "table need set a name"
+		return message, false
+	}
+
+	table.Name = strings.ToLower(table.Name)
 	table.Column = ArrayFilterAndFormat(table.Column)
+	l_len := len(table.Column)
+	if l_len < 2 {
+		message := "[table:" + table.Name + "] is column must bigger than two"
+		return message, false
+	}
+
+	for i := 0; i < l_len; i++ {
+		fmt.Println("column:", table.Column[i])
+	}
 
 	if k_len := len(table.Keys); k_len == 0 {
 		message := "[table:" + table.Name + "] key don't set"
