@@ -53,12 +53,16 @@ static void print_relattrs(NODE *n);
 static void print_relations(NODE *n);
 static void print_conditions(NODE *n);
 static void print_values(NODE *n);
+static const char* string_op(CompOp op);
+static char* type_value(Value &value);
+static char* get_value(Value &value);
+
 
 /*
  * interp: interprets parse trees
  *
  */
-RC interp(NODE *n)
+const char* interp(NODE *n)
 {
    RC errval = 0;         /* returned error value      */
    /* if input not coming from a terminal, then echo the query */
@@ -82,7 +86,7 @@ RC interp(NODE *n)
             /* Make a list of RelAttrs suitable for sending to Query */
             nSelAttrs = mk_rel_attrs(n->u.QUERY.relattrlist, MAXATTRS,
                   relAttrs);
-            if(nSelAttrs < 0){
+            if(nSelAttrs != 1){
                print_error((char*)"select", nSelAttrs);
                break;
             }
@@ -113,23 +117,50 @@ RC interp(NODE *n)
             /* Make the call to Select */
 
 			int i;
+/*
 			cout << "Select\n";
-
 			cout << "   nSelAttrs = " << nSelAttrs << "\n";
 			for (i = 0; i < nSelAttrs; i++)
 				cout << "   selAttrs[" << i << "]:" << relAttrs[i] << "\n";
-
+*/
+			string xml;
+			string xml_begin ="<?xml version=\"1.0\" encoding=\"UTF-8\"?> <all>";
+			char TMP[1023];
+			sprintf(TMP,"<op>%s</op>",relAttrs[0].attrName);
+			string xml_OP =TMP;
+/*
 			cout << "   nRelations = " << nRelations << "\n";
 			for (i = 0; i < nRelations; i++)
 				cout << "   relations[" << i << "] " << relations[i] << "\n";
+*/
+			sprintf(TMP,"<table>%s</table><key>%s</key>",relations[0],relations[1]);
+			string xml_TABLE = TMP;
 
-			cout << "   nWithAttrs = " << nWithAttrs<< "\n";
-			for (i = 0; i < nWithAttrs; i++)
-				cout << "   withAttrs[" << i << "]:" << withAttrs[i] << "\n";
 
-			cout << "   nCondtions = " << nConditions << "\n";
-			for (i = 0; i < nConditions; i++)
-				cout << "   conditions[" << i << "]:" << conditions[i] << "\n";
+			string xml_WITH;
+			//cout << "   nWithAttrs = " << nWithAttrs<< "\n";
+			for (i = 0; i < nWithAttrs; i++) {
+			//	cout << "   withAttrs[" << i << "]:" << withAttrs[i] << "\n";
+				sprintf(TMP,"<with>%s</with>", withAttrs[i]);
+				xml_WITH += TMP;
+			}
+
+
+			string xml_Condtion;
+			//cout << "   nCondtions = " << nConditions << "\n";
+			for (i = 0; i < nConditions; i++) {
+			//	cout << "   conditions[" << i << "]:" << conditions[i] << "\n";
+
+				sprintf(TMP,"<condition><lhsAttr>%s</lhsAttr><op>%s</op><value>%s</value><val_type>%s</val_type></condition>",
+					  conditions[i].lhsAttr.attrName, string_op(conditions[i].op),
+					  get_value(conditions[i].rhsValue), type_value(conditions[i].rhsValue));
+				xml_Condtion += TMP;
+			}
+
+			string xml_end =" </all>";
+			xml = xml_begin + xml_OP + xml_TABLE + xml_WITH + xml_Condtion + xml_end;
+			//cout << xml <<"\n";
+			return xml.c_str();
 
             break;
          }   
@@ -137,7 +168,7 @@ RC interp(NODE *n)
          break;
    }
 
-   return (errval);
+   return NULL;
 }
 
 /*
@@ -547,6 +578,33 @@ static void print_attrtypes(NODE *n)
    }
 }
 
+static const char* string_op(CompOp op)
+{
+   switch(op){
+      case EQ_OP:
+         return(const char*)("EQ_OP");
+         break;
+      case NE_OP:
+         return(const char*)("NE_OP");
+         break;
+      case LT_OP:
+         return(const char*)("LT_OP");
+         break;
+      case LE_OP:
+         return(const char*)("LE_OP");
+         break;
+      case GT_OP:
+         return(const char*)("GT_OP");
+         break;
+      case GE_OP:
+         return(const char*)("GE_OP");
+         break;
+      case NO_OP:
+         return(const char*)("NO_OP");
+         break;
+   }
+}
+
 static void print_op(CompOp op)
 {
    switch(op){
@@ -581,6 +639,39 @@ static void print_relattr(NODE *n)
       printf("%s.",n->u.RELATTR.relname);
    printf("%s",n->u.RELATTR.attrname);
 }  
+
+
+static char* type_value(Value &value)
+{
+   switch (value.type) {
+      case INT:
+return ("INT");
+         break;
+      case FLOAT:
+return ("FLOAT");
+         break;
+      case STRING:
+return ("STRING");
+         break;
+   }
+}
+
+static char* get_value(Value &value)
+{
+	char TMP[1023];
+	switch (value.type) {
+		case INT:
+			sprintf(TMP,"%d", *(int*)(value.data));
+			break;
+		case FLOAT:
+			sprintf(TMP,"%f", *(float*)(value.data));
+			break;
+		case STRING:
+			sprintf(TMP,"%s", value.data);
+			break;
+	}
+	return TMP;
+}
 
 static void print_value(NODE *n)
 {
@@ -643,9 +734,10 @@ static void print_values(NODE *n)
    }
 }
 
-void RBparse(const char * str);
+//void RBparse(const char * str);
 
 
+/*
 int main()
 {
 
@@ -659,3 +751,4 @@ char tstr2[] = "select ddd from ddd.ddd with ddd and ddd where ddd >= 1466252795
      return 0;
 }
 
+*/

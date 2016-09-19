@@ -12,7 +12,7 @@ CC             = g++
 BUILD_DIR      = ./build/
 LIB_DIR        = ./lib/
 INC_DIRS       = -I.
-AR             = ar -rc
+AR             = ar -rv
 RANLIB         = ranlib
 YACC           = bison -dy
 LEX            = flex
@@ -23,7 +23,8 @@ LEX            = flex
 # -O1 - Basic optimization
 # -Wall - All warnings
 # -DDEBUG_PF - This turns on the LOG file for lots of BufferMgr info
-CFLAGS         = -m32 -g -O1 -Wall $(STATS_OPTION) $(INC_DIRS)
+#CFLAGS         = -fPIC -c -m32 -g -O1 -Wall $(STATS_OPTION) $(INC_DIRS)
+CFLAGS         = -fPIC -c -g -O1 -Wall $(STATS_OPTION) $(INC_DIRS)
 
 # The STATS_OPTION can be set to -DPF_STATS or to nothing to turn on and
 # off buffer manager statistics.  The student should not modify this
@@ -34,17 +35,13 @@ STATS_OPTION   = -DPF_STATS
 # Students: Please modify SOURCES variables as needed.
 #
 PARSER_SOURCES = scan.c parse.c nodes.c 
-UTILS_SOURCES  = interp.cc
 
-UTILS_OBJECTS  = $(addprefix $(BUILD_DIR), $(UTILS_SOURCES:.cc=.o))
 PARSER_OBJECTS = $(addprefix $(BUILD_DIR), $(PARSER_SOURCES:.c=.o))
 OBJECTS        = $(QL_OBJECTS) $(PARSER_OBJECTS) $(UTILS_OBJECTS)
 
 LIBRARY_PARSER = $(LIB_DIR)libparser.a
 LIBRARIES      = $(LIBRARY_PARSER)
 
-UTILS          = $(UTILS_SOURCES:.cc=)
-EXECUTABLES    = $(UTILS)
 
 LIBS           = -lparser
 
@@ -63,9 +60,9 @@ testers: all $(TESTS)
 #
 
 $(LIBRARY_PARSER): $(PARSER_OBJECTS)
-	$(AR) $(LIBRARY_PARSER) $(PARSER_OBJECTS)
-	$(RANLIB) $(LIBRARY_PARSER)
 	./b.sh	
+	$(AR) $(LIBRARY_PARSER) $(PARSER_OBJECTS) ./build/interp.o  ./build/ql_error.o
+	$(RANLIB) $(LIBRARY_PARSER)
 
 #
 # Parser

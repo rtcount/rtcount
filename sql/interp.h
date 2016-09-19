@@ -19,7 +19,7 @@
 #include "y.tab.h"
 
 
-RC interp(NODE *n);
+const char* interp(NODE *n);
 void QL_PrintError(RC rc);
 
 #define QL_BADINSERT            (START_QL_WARN + 0) // Bad insert

@@ -26,6 +26,8 @@ void yyrestart(FILE*);
  */
 extern void* yy_scan_string (const char *yy_str);
 
+extern "C" const char* RBparse(const char * str);
+
 /*
  * points to root of parse tree
  */
@@ -531,15 +533,20 @@ void PrintError(RC rc)
 //
 // Desc: Parse redbase commands
 //
-void RBparse(const char * str)
+const char*  RBparse(const char * str)
 {
-   RC rc;
+   //RC rc;
 	yy_scan_string(str);
       /* If a query was successfully read, interpret it */
-      if(yyparse() == 0 && parse_tree != NULL)
+	if(yyparse() == 0 && parse_tree != NULL)
+		return interp(parse_tree);
+
+	return NULL;
+/*
          if ((rc = interp(parse_tree))) {
             PrintError(rc);
          }
+*/
 }
 
 //

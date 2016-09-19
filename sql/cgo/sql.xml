@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<all>
+	<op>SUM</op>
+	<table>table</table>
+	<key>key</key>
+	<with>time</with>
+	<with>index</with>
+	<condition> <!-- ssdb -->
+		<lhsAttr>xxx</lhsAttr>
+		<op>">="</op>
+		<value>5</value>
+		<val_type>1000</val_type>
+	</condition>
+</all>

@@ -222,7 +222,7 @@ NODE *prepend(NODE *n, NODE *list);
 void reset_scanner(void);
 void reset_charptr(void);
 void new_query(void);
-RC   interp(NODE *n);
+const char*  interp(NODE *n);
 int  yylex(void);
 int  yyparse(void);
 
