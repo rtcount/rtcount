@@ -61,17 +61,17 @@ func rtcount_gen_dates(timestmp int64, t_key *Table_Key) []string {
 		week2 = week
 	}
 
-	date_map["ALL"] = "a"
-	date_map["MIN"] = "m" + f[0:12]
-	date_map["MIN5"] = "5m" + f[0:11] + min5last
-	date_map["MIN10"] = "1m" + f[0:11] + "0"
-	date_map["MIN30"] = "3m" + f[0:10] + min30last
-	date_map["HOUR"] = "h" + f[0:10]
-	date_map["DAY"] = "d" + f[0:8]
-	date_map["WEEK"] = "w" + fmt.Sprintf("%d%02d", year, week)
-	date_map["WEEK2"] = "2w" + fmt.Sprintf("%d%02d", year, week2)
-	date_map["MON"] = "mo" + f[0:6]
-	date_map["YEAR"] = "y" + f[0:4]
+	date_map["all"] = "a"
+	date_map["min"] = "m" + f[0:12]
+	date_map["min5"] = "5m" + f[0:11] + min5last
+	date_map["min10"] = "1m" + f[0:11] + "0"
+	date_map["min30"] = "3m" + f[0:10] + min30last
+	date_map["hour"] = "h" + f[0:10]
+	date_map["day"] = "d" + f[0:8]
+	date_map["week"] = "w" + fmt.Sprintf("%d%02d", year, week)
+	date_map["week2"] = "2w" + fmt.Sprintf("%d%02d", year, week2)
+	date_map["mon"] = "mo" + f[0:6]
+	date_map["year"] = "y" + f[0:4]
 
 	/*
 		for _, val := range date_map {
@@ -93,6 +93,7 @@ func rtcount_gen_indexs(conn *gossdb.Client, table *Table, t_key *Table_Key, str
 
 	for _, indx := range t_key.Index {
 		var index_str string
+		//indx.i_columnref已经被sort过了，所以这里使用range，其顺序是固定的
 		for _, val := range indx.i_columnref {
 			index_str += strs[val]
 
