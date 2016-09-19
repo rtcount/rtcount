@@ -54,8 +54,8 @@ static void print_relations(NODE *n);
 static void print_conditions(NODE *n);
 static void print_values(NODE *n);
 static const char* string_op(CompOp op);
-static char* type_value(Value &value);
-static char* get_value(Value &value);
+static const char* type_value(Value &value);
+static string get_value(Value &value);
 
 
 /*
@@ -64,7 +64,7 @@ static char* get_value(Value &value);
  */
 const char* interp(NODE *n)
 {
-   RC errval = 0;         /* returned error value      */
+   //RC errval = 0;         /* returned error value      */
    /* if input not coming from a terminal, then echo the query */
    if(!isatty(0))
       echo_query(n);
@@ -153,7 +153,7 @@ const char* interp(NODE *n)
 
 				sprintf(TMP,"<condition><lhsAttr>%s</lhsAttr><op>%s</op><value>%s</value><val_type>%s</val_type></condition>",
 					  conditions[i].lhsAttr.attrName, string_op(conditions[i].op),
-					  get_value(conditions[i].rhsValue), type_value(conditions[i].rhsValue));
+					  get_value(conditions[i].rhsValue).c_str(), type_value(conditions[i].rhsValue));
 				xml_Condtion += TMP;
 			}
 
@@ -580,29 +580,30 @@ static void print_attrtypes(NODE *n)
 
 static const char* string_op(CompOp op)
 {
-   switch(op){
-      case EQ_OP:
-         return(const char*)("EQ_OP");
-         break;
-      case NE_OP:
-         return(const char*)("NE_OP");
-         break;
-      case LT_OP:
-         return(const char*)("LT_OP");
-         break;
-      case LE_OP:
-         return(const char*)("LE_OP");
-         break;
-      case GT_OP:
-         return(const char*)("GT_OP");
-         break;
-      case GE_OP:
-         return(const char*)("GE_OP");
-         break;
-      case NO_OP:
-         return(const char*)("NO_OP");
-         break;
-   }
+	switch(op){
+		case EQ_OP:
+			return(const char*)("EQ_OP");
+			break;
+		case NE_OP:
+			return(const char*)("NE_OP");
+			break;
+		case LT_OP:
+			return(const char*)("LT_OP");
+			break;
+		case LE_OP:
+			return(const char*)("LE_OP");
+			break;
+		case GT_OP:
+			return(const char*)("GT_OP");
+			break;
+		case GE_OP:
+			return(const char*)("GE_OP");
+			break;
+		case NO_OP:
+			return(const char*)("NO_OP");
+			break;
+	}
+	return(const char*)("NO_OP");
 }
 
 static void print_op(CompOp op)
@@ -641,24 +642,22 @@ static void print_relattr(NODE *n)
 }  
 
 
-static char* type_value(Value &value)
+static const char* type_value(Value &value)
 {
-   switch (value.type) {
-      case INT:
-return ("INT");
-         break;
-      case FLOAT:
-return ("FLOAT");
-         break;
-      case STRING:
-return ("STRING");
-         break;
-   }
+	switch (value.type) {
+		case INT:
+			return ("INT");
+		case FLOAT:
+			return ("FLOAT");
+		case STRING:
+			return ("STRING");
+	}
+	return ("STRING");
 }
 
-static char* get_value(Value &value)
-{
-	char TMP[1023];
+static string get_value(Value &value)
+{	
+	char TMP[512];
 	switch (value.type) {
 		case INT:
 			sprintf(TMP,"%d", *(int*)(value.data));
@@ -667,10 +666,11 @@ static char* get_value(Value &value)
 			sprintf(TMP,"%f", *(float*)(value.data));
 			break;
 		case STRING:
-			sprintf(TMP,"%s", value.data);
+			sprintf(TMP,"%s", (char*)value.data);
 			break;
 	}
-	return TMP;
+	string str= TMP;
+	return str;
 }
 
 static void print_value(NODE *n)

@@ -6,10 +6,6 @@
 extern "C" {          //
 #endif
 
-
-extern void hello();
-extern int Num;
-
 extern const char* ddd(const char * str);
 
 #ifdef __cplusplus
