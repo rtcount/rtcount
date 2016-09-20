@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	/* opkey: maxmin|sum|union|count */
+	/* opkey: maxmin|sum|new|active|count */
 	COUNT  = 1 << 0
 	NEW    = 1 << 1
 	ACTIVE = 1 << 2
@@ -19,18 +19,15 @@ const (
 )
 
 /* setting ssdb key pre values */
-const (
-	PRE_KEYSET       = "set_"
-	PRE_COUNT_KEYOP  = "cot_"
-	PRE_NEW_KEYOP    = "new_"
-	PRE_ACTIVE_KEYOP = "act_"
-	PRE_SUM_KEYOP    = "sum_"
-	PRE_MAX_KEYOP    = "max_"
-	PRE_MIN_KEYOP    = "min_"
-	PRE_INDEX_KEYOP  = "index_"
-)
-
-var OP_KEY = map[string]string{"set": "set_", "count": "cot_", "new": "new_", "active": "act_", "sum": "sum_", "max": "max_", "min": "min_", "index": "index_"}
+var OP_KEY = map[string]string{
+	"set":    "set",
+	"count":  "cot",
+	"new":    "new",
+	"active": "act",
+	"sum":    "sum",
+	"max":    "max",
+	"min":    "min",
+	"index":  "index"}
 
 func rtcount_gen_dates(timestmp int64, t_key *Table_Key) []string {
 
@@ -101,7 +98,7 @@ func rtcount_gen_indexs(conn *gossdb.Client, table *Table, t_key *Table_Key, str
 			index_str += strs[val]
 
 			//store to table column of ssdb
-			s_kvkey := PRE_KEYSET + PRE_INDEX_KEYOP + table.Name + "_" + strconv.Itoa(val)
+			s_kvkey := OP_KEY["set"] + "_" + OP_KEY["index"] + "_" + table.Name + "_" + strconv.Itoa(val)
 			if freecache.Localcache_check_and_set(s_kvkey+strs[val]) == false {
 				conn.Zset(s_kvkey, strs[val], 1)
 			}
@@ -178,7 +175,7 @@ func rtcount_core_table_key(conn *gossdb.Client, table *Table, t_key *Table_Key,
 }
 
 func rtcount_core_count(conn *gossdb.Client, kv_pre string, key string, dates []string, indexs []string) {
-	var op_key_pre string = PRE_COUNT_KEYOP + kv_pre
+	var op_key_pre string = OP_KEY["count"] + "_" + kv_pre
 	//kv_prt = table.Name + "_" + t_key.Name
 
 	for _, indx_val := range indexs {
@@ -191,13 +188,13 @@ func rtcount_core_count(conn *gossdb.Client, kv_pre string, key string, dates []
 }
 
 func rtcount_core_new(conn *gossdb.Client, kv_pre string, key string, dates []string, indexs []string) {
-	var key_set_pre string = PRE_KEYSET
+	var key_set_pre string = OP_KEY["set"]
 	var op_key_pre string
 
 	//-----handle new op-----------------------------------------------------------------------------
-	op_key_pre = PRE_NEW_KEYOP + kv_pre
+	op_key_pre = OP_KEY["new"] + "_" + kv_pre
 	for _, indx_val := range indexs {
-		s_kvkey := key_set_pre + op_key_pre + "_a" + "_" + indx_val
+		s_kvkey := key_set_pre + "_" + op_key_pre + "_a_" + indx_val
 		//check localcace first
 		if freecache.Localcache_check_and_set(s_kvkey+key) == true {
 			//old key
@@ -223,11 +220,11 @@ func rtcount_core_new(conn *gossdb.Client, kv_pre string, key string, dates []st
 }
 
 func rtcount_core_active(conn *gossdb.Client, kv_pre string, key string, dates []string, indexs []string) {
-	var key_set_pre string = PRE_KEYSET
+	var key_set_pre string = OP_KEY["set"]
 	var op_key_pre string
 
 	//-----handle active op-----------------------------------------------------------------------------
-	op_key_pre = PRE_ACTIVE_KEYOP + kv_pre
+	op_key_pre = OP_KEY["active"] + "_" + kv_pre
 	for _, indx_val := range indexs {
 		t_len := len(dates)
 		for t := 0; t < t_len; t++ {
@@ -235,7 +232,7 @@ func rtcount_core_active(conn *gossdb.Client, kv_pre string, key string, dates [
 				continue //"ALL" don't need to cale active...
 			}
 			kvkey := op_key_pre + "_" + dates[t] + "_" + indx_val
-			s_kvkey := key_set_pre + kvkey
+			s_kvkey := key_set_pre + "_" + kvkey
 
 			//check localcace first
 			if freecache.Localcache_check_and_set(s_kvkey+key) == true {
@@ -254,7 +251,7 @@ func rtcount_core_active(conn *gossdb.Client, kv_pre string, key string, dates [
 						continue //"ALL" don't need to cale active...
 					}
 					kvkey := op_key_pre + "_" + dates[last] + "_" + indx_val
-					s_kvkey := key_set_pre + kvkey
+					s_kvkey := key_set_pre + "_" + kvkey
 
 					conn.Zset(s_kvkey, key, 1)
 					conn.Incr(kvkey, 1)
@@ -267,7 +264,7 @@ func rtcount_core_active(conn *gossdb.Client, kv_pre string, key string, dates [
 }
 
 func rtcount_core_sum(conn *gossdb.Client, kv_pre string, key_int int64, dates []string, indexs []string) {
-	var op_key_pre string = PRE_SUM_KEYOP + kv_pre
+	var op_key_pre string = OP_KEY["sum"] + "_" + kv_pre
 
 	for _, indx_val := range indexs {
 		for _, date_val := range dates {
@@ -279,7 +276,7 @@ func rtcount_core_sum(conn *gossdb.Client, kv_pre string, key_int int64, dates [
 }
 
 func rtcount_core_max(conn *gossdb.Client, kv_pre string, key_int int64, dates []string, indexs []string) {
-	var op_key_pre string = PRE_MAX_KEYOP + kv_pre
+	var op_key_pre string = OP_KEY["max"] + "_" + kv_pre
 
 	for _, indx_val := range indexs {
 		for _, date_val := range dates {
@@ -299,7 +296,7 @@ func rtcount_core_max(conn *gossdb.Client, kv_pre string, key_int int64, dates [
 }
 
 func rtcount_core_min(conn *gossdb.Client, kv_pre string, key_int int64, dates []string, indexs []string) {
-	var op_key_pre string = PRE_MIN_KEYOP + kv_pre
+	var op_key_pre string = OP_KEY["min"] + "_" + kv_pre
 
 	for _, indx_val := range indexs {
 		for _, date_val := range dates {
