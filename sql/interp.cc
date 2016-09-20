@@ -117,22 +117,20 @@ const char* interp(NODE *n)
             /* Make the call to Select */
 
 			int i;
-/*
 			cout << "Select\n";
 			cout << "   nSelAttrs = " << nSelAttrs << "\n";
 			for (i = 0; i < nSelAttrs; i++)
 				cout << "   selAttrs[" << i << "]:" << relAttrs[i] << "\n";
-*/
+
 			string xml;
 			string xml_begin ="<?xml version=\"1.0\" encoding=\"UTF-8\"?> <all>";
 			char TMP[1023];
 			sprintf(TMP,"<op>%s</op>",relAttrs[0].attrName);
 			string xml_OP =TMP;
-/*
 			cout << "   nRelations = " << nRelations << "\n";
 			for (i = 0; i < nRelations; i++)
 				cout << "   relations[" << i << "] " << relations[i] << "\n";
-*/
+
 			sprintf(TMP,"<table>%s</table><key>%s</key>",relations[0],relations[1]);
 			string xml_TABLE = TMP;
 
@@ -140,16 +138,16 @@ const char* interp(NODE *n)
 			string xml_WITH;
 			//cout << "   nWithAttrs = " << nWithAttrs<< "\n";
 			for (i = 0; i < nWithAttrs; i++) {
-			//	cout << "   withAttrs[" << i << "]:" << withAttrs[i] << "\n";
+				cout << "   withAttrs[" << i << "]:" << withAttrs[i] << "\n";
 				sprintf(TMP,"<with>%s</with>", withAttrs[i]);
 				xml_WITH += TMP;
 			}
 
 
 			string xml_Condtion;
-			//cout << "   nCondtions = " << nConditions << "\n";
+			cout << "   nCondtions = " << nConditions << "\n";
 			for (i = 0; i < nConditions; i++) {
-			//	cout << "   conditions[" << i << "]:" << conditions[i] << "\n";
+				cout << "   conditions[" << i << "]:" << conditions[i] << "\n";
 
 				sprintf(TMP,"<condition><lhsAttr>%s</lhsAttr><op>%s</op><value>%s</value><val_type>%s</val_type></condition>",
 					  conditions[i].lhsAttr.attrName, string_op(conditions[i].op),
@@ -160,7 +158,9 @@ const char* interp(NODE *n)
 			string xml_end =" </all>";
 			xml = xml_begin + xml_OP + xml_TABLE + xml_WITH + xml_Condtion + xml_end;
 			//cout << xml <<"\n";
-			return xml.c_str();
+			char * xml_c = (char *) malloc(xml.length()+1);
+			memcpy(xml_c, xml.c_str(), xml.length());
+			return xml_c;
 
             break;
          }   
@@ -582,6 +582,30 @@ static const char* string_op(CompOp op)
 {
 	switch(op){
 		case EQ_OP:
+			return(const char*)("=");
+			break;
+		case NE_OP:
+			return(const char*)("!=");
+			break;
+		case LT_OP:
+			return(const char*)("<");
+			break;
+		case LE_OP:
+			return(const char*)("<=");
+			break;
+		case GT_OP:
+			return(const char*)(">");
+			break;
+		case GE_OP:
+			return(const char*)(">=");
+			break;
+		case NO_OP:
+			return(const char*)("NO_OP");
+			break;
+	}
+/*
+	switch(op){
+		case EQ_OP:
 			return(const char*)("EQ_OP");
 			break;
 		case NE_OP:
@@ -603,6 +627,7 @@ static const char* string_op(CompOp op)
 			return(const char*)("NO_OP");
 			break;
 	}
+*/
 	return(const char*)("NO_OP");
 }
 
@@ -660,10 +685,10 @@ static string get_value(Value &value)
 	char TMP[512];
 	switch (value.type) {
 		case INT:
-			sprintf(TMP,"%d", *(int*)(value.data));
+			sprintf(TMP,"%d", *(int*)value.data);
 			break;
 		case FLOAT:
-			sprintf(TMP,"%f", *(float*)(value.data));
+			sprintf(TMP,"%f", *(float*)value.data);
 			break;
 		case STRING:
 			sprintf(TMP,"%s", (char*)value.data);

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 	//"io"
-	//"io/ioutil"
+	"io/ioutil"
 	"net/http"
 	//	"time"
 )
@@ -118,7 +118,11 @@ func query(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Fprint(w, "ok")
+	query, _ := ioutil.ReadAll(req.Body)
+
+	ret := sql_query(p_byteString(query))
+
+	fmt.Fprint(w, ret)
 }
 
 func s_byteString(p [][]byte) (strs []string) {

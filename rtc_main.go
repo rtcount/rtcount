@@ -30,7 +30,7 @@ func rtcount_before(tablename string, strs []string) {
 	//fmt.Println("-----------------------\n")
 	//fmt.Println(strs)
 	sem <- 1
-	go rtcount_handle_talbe(tablename, strs)
+	go rtcount_handle_talbe(strings.ToLower(tablename), strs)
 	<-sem
 
 	//rtcount_core(UNION|SUM|MIN|MAX, strs[3], strs[1], strs[0],strs[2], "")

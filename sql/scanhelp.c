@@ -35,7 +35,7 @@ static char *string_alloc(int len)
    char *s;
 
    if(charptr + len > MAXCHAR){
-      fprintf(stderr, "out of memory\n");
+      fprintf(stderr, "string_alloc out of memory\n");
       exit(1);
    }
 

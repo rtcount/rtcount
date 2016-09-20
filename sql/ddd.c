@@ -14,14 +14,18 @@ const char* ddd(const char * str);
 }
 #endif
 
+char  xml_parser[1024*10];
 //int ddd(const char* str)
 const char* ddd(const char * str)
 {
-	const char * dd = RBparse(str);
+	char * dd = (char*)RBparse(str);
 	if (dd==NULL)
 		return "";
-	return dd;
 
+	memset(xml_parser, 0, 1024*10);
+	memcpy(xml_parser, dd, strlen(dd));
+	free(dd);
+	return (const char*)xml_parser;
 /*
 	   char tstr[] = "select asdddd from T_devices.ddd with zxc and xxx where created_at >= 1466252795 and product_id = 'T_devices.product_id' and product_id = \"T_devices.product_id\" and time =\"ad\" and time >'asd';";
 

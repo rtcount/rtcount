@@ -13,7 +13,7 @@
 /*
  * total number of nodes available for a given parse-tree
  */
-#define MAXNODE		100
+#define MAXNODE		1000
 
 static NODE nodepool[MAXNODE];
 static int nodeptr = 0;
@@ -60,7 +60,7 @@ NODE *newnode(NODEKIND kind)
 
     /* if we've used up all of the nodes then error */
     if(nodeptr == MAXNODE){
-	fprintf(stderr, "out of memory\n");
+	fprintf(stderr, "newnode out of memory\n");
 	exit(1);
     }
 

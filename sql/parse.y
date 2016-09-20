@@ -537,6 +537,7 @@ const char*  RBparse(const char * str)
 {
    //RC rc;
 	yy_scan_string(str);
+	new_query();
       /* If a query was successfully read, interpret it */
 	if(yyparse() == 0 && parse_tree != NULL)
 		return interp(parse_tree);
