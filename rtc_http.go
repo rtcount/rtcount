@@ -68,12 +68,12 @@ func info(w http.ResponseWriter, req *http.Request) {
 				}
 			}
 
-			if opkey&UNION == UNION {
+			if opkey&NEW == NEW {
 				kvkey := PRE_NEW_KEYOP + kv_pre + "_a_a"
 				if res, err := conn.Get(kvkey); err == nil {
-					rtc_server_info += " UNION[ " + res.String() + " ]"
+					rtc_server_info += " NEW[ " + res.String() + " ]"
 				} else {
-					rtc_server_info += " UNION[ 0 ]"
+					rtc_server_info += " NEW[ 0 ]"
 				}
 			}
 

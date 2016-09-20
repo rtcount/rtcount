@@ -87,7 +87,8 @@
 			<timestamp_columnref>c03</timestamp_columnref>
 
 			<keyop>
-				<op>UNION</op>
+				<op>NEW</op>
+				<op>ACTIVE</op>
 			</keyop>
 
 			<index name="AppId">
@@ -108,7 +109,8 @@
 			<timestamp_columnref>c03</timestamp_columnref>
 
 			<keyop>
-				<op>UNION</op>
+				<op>NEW</op>
+				<op>ACTIVE</op>
 			</keyop>
 
 			<index name="AppId">
@@ -160,7 +162,8 @@
 			<timestamp_columnref>time</timestamp_columnref>
 
 			<keyop>
-				<op>UNION</op>
+				<op>NEW</op>
+				<op>ACTIVE</op>
 			</keyop>
 
 			<index name="AppId">
@@ -181,7 +184,8 @@
 			<timestamp_columnref>time</timestamp_columnref>
 
 			<keyop>
-				<op>UNION</op>
+				<op>NEW</op>
+				<op>ACTIVE</op>
 			</keyop>
 
 			<index name="AppId">

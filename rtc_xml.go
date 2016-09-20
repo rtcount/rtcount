@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
-	"sort"
+	//"sort"
 	"strings"
 )
 
@@ -57,9 +57,9 @@ type Index struct {
 	i_columnref []int    //* index number of Columnref in table.Column[*]
 }
 
-var KEYOPS = []string{"count", "union", "sum", "max", "min"}
-var KEYOPS_default = []string{"union"}
-var keyopFlag_default int = UNION
+var KEYOPS = []string{"count", "new", "active", "sum", "max", "min"}
+var KEYOPS_default = []string{"new"}
+var keyopFlag_default int = NEW
 
 var TIMEINDEXS = []string{"min", "min5", "min10", "min30", "hour", "day", "week", "week2", "mon", "year"}
 var TIMEINDEXS_defualt = []string{"hour", "day"}
@@ -167,15 +167,17 @@ func CheckAndFix_table_key(table *Table, t_key *Table_Key) (string, bool) {
 				goto Err
 			}
 			switch op_val {
-			case "COUNT":
+			case "count":
 				t_key.keyopFlag = t_key.keyopFlag | COUNT
-			case "UNION":
-				t_key.keyopFlag = t_key.keyopFlag | UNION
-			case "SUM":
+			case "new":
+				t_key.keyopFlag = t_key.keyopFlag | NEW
+			case "active":
+				t_key.keyopFlag = t_key.keyopFlag | ACTIVE
+			case "sum":
 				t_key.keyopFlag = t_key.keyopFlag | SUM
-			case "MAX":
+			case "max":
 				t_key.keyopFlag = t_key.keyopFlag | MAX
-			case "MIN":
+			case "min":
 				t_key.keyopFlag = t_key.keyopFlag | MIN
 			}
 		}
@@ -219,19 +221,19 @@ func CheckAndFix_table_key(table *Table, t_key *Table_Key) (string, bool) {
 				}
 			}
 			/*
-				//对key索引列值进行排序，这样key索引位置可以变动，而不影响其生成
-				fmt.Println("\n*************************************\n")
-				fmt.Println(t_key.Index[i].i_columnref)
-				fmt.Println(t_key.Index[i].Columnref)
+					//对key索引列值进行排序，这样key索引位置可以变动，而不影响其生成
+					fmt.Println("\n*************************************\n")
+					fmt.Println(t_key.Index[i].i_columnref)
+					fmt.Println(t_key.Index[i].Columnref)
 
-				fmt.Println("\n-------------------------------------\n")
-				sort.Sort(sort.IntSlice(t_key.Index[i].i_columnref))
-				fmt.Println(t_key.Index[i].i_columnref)
-				fmt.Println("\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n")
+					fmt.Println("\n-------------------------------------\n")
+					sort.Sort(sort.IntSlice(t_key.Index[i].i_columnref))
+					fmt.Println(t_key.Index[i].i_columnref)
+					fmt.Println("\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n")
+				for _, val := range t_key.Index[i].i_columnref {
+					fmt.Println("\n", val, "\n")
+				}
 			*/
-			for _, val := range t_key.Index[i].i_columnref {
-				fmt.Println("\n", val, "\n")
-			}
 		}
 
 	}
@@ -257,10 +259,11 @@ func CheckAndFix_table(table *Table) (string, bool) {
 		message := "[table:" + table.Name + "] is column must bigger than two"
 		return message, false
 	}
-
-	for i := 0; i < l_len; i++ {
-		fmt.Println("column:", table.Column[i])
-	}
+	/*
+		for i := 0; i < l_len; i++ {
+			fmt.Println("column:", table.Column[i])
+		}
+	*/
 
 	if k_len := len(table.Keys); k_len == 0 {
 		message := "[table:" + table.Name + "] key don't set"

@@ -10,11 +10,12 @@ import (
 
 const (
 	/* opkey: maxmin|sum|union|count */
-	COUNT = 1 << 0
-	UNION = 1 << 1
-	SUM   = 1 << 2
-	MAX   = 1 << 3
-	MIN   = 1 << 4
+	COUNT  = 1 << 0
+	NEW    = 1 << 1
+	ACTIVE = 1 << 2
+	SUM    = 1 << 3
+	MAX    = 1 << 4
+	MIN    = 1 << 5
 )
 
 /* setting ssdb key pre values */
@@ -28,6 +29,8 @@ const (
 	PRE_MIN_KEYOP    = "min_"
 	PRE_INDEX_KEYOP  = "index_"
 )
+
+var OP_KEY = map[string]string{"set": "set_", "count": "cot_", "new": "new_", "active": "act_", "sum": "sum_", "max": "max_", "min": "min_", "index": "index_"}
 
 func rtcount_gen_dates(timestmp int64, t_key *Table_Key) []string {
 
@@ -148,8 +151,12 @@ func rtcount_core_table_key(conn *gossdb.Client, table *Table, t_key *Table_Key,
 		rtcount_core_count(conn, kv_pre, key, dates, indexs)
 	}
 
-	if opkey&UNION == UNION {
-		rtcount_core_union(conn, kv_pre, key, dates, indexs)
+	if opkey&NEW == NEW {
+		rtcount_core_new(conn, kv_pre, key, dates, indexs)
+	}
+
+	if opkey&ACTIVE == ACTIVE {
+		rtcount_core_active(conn, kv_pre, key, dates, indexs)
 	}
 
 	key_int, err := strconv.ParseInt(key, 10, 64)
@@ -183,7 +190,7 @@ func rtcount_core_count(conn *gossdb.Client, kv_pre string, key string, dates []
 	}
 }
 
-func rtcount_core_union(conn *gossdb.Client, kv_pre string, key string, dates []string, indexs []string) {
+func rtcount_core_new(conn *gossdb.Client, kv_pre string, key string, dates []string, indexs []string) {
 	var key_set_pre string = PRE_KEYSET
 	var op_key_pre string
 
@@ -213,6 +220,11 @@ func rtcount_core_union(conn *gossdb.Client, kv_pre string, key string, dates []
 			//fmt.Println("new--- \n", kvkey)
 		}
 	}
+}
+
+func rtcount_core_active(conn *gossdb.Client, kv_pre string, key string, dates []string, indexs []string) {
+	var key_set_pre string = PRE_KEYSET
+	var op_key_pre string
 
 	//-----handle active op-----------------------------------------------------------------------------
 	op_key_pre = PRE_ACTIVE_KEYOP + kv_pre

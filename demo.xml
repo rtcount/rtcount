@@ -14,17 +14,24 @@
 		<column>key</column>
 		<column>timestamp</column>
 		<column>key2</column>
+		<column>clm3</column>
 		<column>clm1</column>
 		<column>clm2</column>
-		<column>clm3</column>
 
 		<key name="demo_mini">
 			<key_columnref>key</key_columnref>
 			<timestamp_columnref>timestamp</timestamp_columnref>
 			<index name="index_1">
 				<columnref>clm1</columnref>
+				<columnref>clm2</columnref>
 				<columnref>clm3</columnref>
 			</index>
+			<keyop> <!-- Options default "NEW" -->
+				<op>SUM</op> <!-- [SUM/MAX/MIN] only work when [key_columnref] is number-->
+			</keyop>
+			<timeindex> <!-- Options default "HOUR,DAY" -->
+				<tmindex>MIN</tmindex>
+			</timeindex>
 		</key>
 
 		<key name="demo_full">
@@ -32,9 +39,10 @@
 <!-- timestamp_columnref must be timestamp format like [1472649684] -->
 			<timestamp_columnref>timestamp</timestamp_columnref>
 
-			<keyop> <!-- Options default "COUNT,UNION" -->
+			<keyop> <!-- Options default "NEW" -->
 				<op>COUNT</op>
-				<op>UNION</op>
+				<op>NEW</op>
+				<op>ACTIVE</op>
 				<op>SUM</op> <!-- [SUM/MAX/MIN] only work when [key_columnref] is number-->
 				<op>MAX</op>
 				<op>MIN</op>
