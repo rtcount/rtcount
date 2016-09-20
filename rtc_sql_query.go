@@ -49,6 +49,8 @@ func checkTimeIndex(with []string, TIME *string, INDEX *string, i_Index **Index,
 	//检测索引是否在当前KEY里设置了
 	match := false
 	for _, indx := range t_key.Index {
+
+		//	fmt.Println("\n", indx.Name, "\n")
 		if indx.Name == *INDEX {
 			match = true
 			*i_Index = &indx
@@ -165,65 +167,79 @@ func checkWhere(where []condition, TimeIndex string, i_Index *Index, table *Tabl
 		}
 	}
 
+	if len(whereTimeList) == 0 && len(whereList) == 0 {
+		*query_Index = "a_a"
+		return true, "OK"
+	}
+
 	//fmt.Println(whereList)
 	//fmt.Println(whereTimeList)
+	var time_index string
+	var index_str string
 
-	if len(whereTimeList) != 1 {
-		return false, "Two many TIME near where"
+	if len(whereTimeList) == 0 {
+		time_index = "a"
+	} else {
+		if len(whereTimeList) != 1 {
+			return false, "Two many TIME near where"
+		}
+
+		if whereTimeList[0].Op != "=" {
+			return false, "The time index column just support '=' OP near where "
+		}
+
+		date_int, err := strconv.ParseInt(whereTimeList[0].Value, 10, 64)
+		if err != nil {
+			return false, "time is value error near where"
+		}
+
+		time_index = rtcount_gen_time(date_int, TimeIndex)
 	}
-
-	if whereTimeList[0].Op != "=" {
-		return false, "The time index column just support '=' OP near where "
-	}
-
-	date_int, err := strconv.ParseInt(whereTimeList[0].Value, 10, 64)
-	if err != nil {
-		return false, "time is value error near where"
-	}
-
-	time_index := rtcount_gen_time(date_int, TimeIndex)
 
 	l_len := len(whereList)
-	//过滤索引列和操作值
-	for i := 0; i < l_len; i++ {
-		index_column := GetIndexInArrayByString(whereList[i].LhsAttr, i_Index.Columnref)
-		if index_column == -1 {
-			return false, "There is a error with [" + whereList[i].LhsAttr + "] near where "
+	if l_len == 0 {
+		index_str = "a"
+	} else {
+		//过滤索引列和操作值
+		for i := 0; i < l_len; i++ {
+			index_column := GetIndexInArrayByString(whereList[i].LhsAttr, i_Index.Columnref)
+			if index_column == -1 {
+				return false, "There is a error with [" + whereList[i].LhsAttr + "] near where "
+			}
+			whereList[i].i_columnref = GetIndexInArrayByString(whereList[i].LhsAttr, table.Column)
+
+			//if whereList[i].Op != "=" {
+			if whereList[i].Op != "=" {
+				return false, "The index column [" + whereList[i].LhsAttr + "] just support '=' OP near where "
+			}
 		}
-		whereList[i].i_columnref = GetIndexInArrayByString(whereList[i].LhsAttr, table.Column)
 
-		//if whereList[i].Op != "=" {
-		if whereList[i].Op != "=" {
-			return false, "The index column [" + whereList[i].LhsAttr + "] just support '=' OP near where "
+		//检测索引列是否重复
+
+		var whereNameList []string
+		for _, val := range whereList {
+			if GetIndexInArrayByString(val.LhsAttr, whereNameList) != -1 {
+				return false, "The index column [" + val.LhsAttr + "] repeat near where "
+			}
+			whereNameList = append(whereNameList, val.LhsAttr)
 		}
-	}
 
-	//检测索引列是否重复
-
-	var whereNameList []string
-	for _, val := range whereList {
-		if GetIndexInArrayByString(val.LhsAttr, whereNameList) != -1 {
-			return false, "The index column [" + val.LhsAttr + "] repeat near where "
+		//检测索引列数目缺少的
+		for _, column := range i_Index.Columnref {
+			if GetIndexInArrayByString(column, whereNameList) == -1 {
+				return false, "Miss index column [" + column + "] in where "
+			}
 		}
-		whereNameList = append(whereNameList, val.LhsAttr)
-	}
 
-	//检测索引列数目缺少的
-	for _, column := range i_Index.Columnref {
-		if GetIndexInArrayByString(column, whereNameList) == -1 {
-			return false, "Miss index column [" + column + "] in where "
-		}
-	}
-
-	//产生index索引key
-	var index_str string
-	//indx.i_columnref已经被sort过了，所以这里使用range，其顺序是固定的
-	for _, val := range i_Index.i_columnref {
-		//fmt.Println("\n", val, "\n")
-		for _, item := range whereList {
-			if val == item.i_columnref {
-				index_str += item.Value
-				//		fmt.Println("\n", item.Value, "\n")
+		//产生index索引key
+		//indx.i_columnref已经被sort过了，所以这里使用range，其顺序是固定的
+		for _, val := range i_Index.i_columnref {
+			//fmt.Println("\n", val, "\n")
+			for _, item := range whereList {
+				if val == item.i_columnref {
+					index_str += item.Value
+					//		fmt.Println("\n", item.Value, "\n")
+				}
 			}
 		}
 	}
@@ -272,24 +288,48 @@ func checkSQL(sql RTC_Sql) (bool, string) {
 	}
 
 	fmt.Println(sql.Op, sql.Table, sql.Key, query_index)
-	//fmt.Println(where)
+	kv := sql_gen_key(sql.Op, sql.Table, sql.Key, query_index)
+	//fmt.Println(kv)
 
-	return true, "OK"
+	return true, kv
 
+}
+
+func sql_gen_key(OP string, Table string, Key string, query_index string) string {
+	var op_key_pre string = OP_KEY[OP]
+
+	KV := op_key_pre + Table + "_" + Key + "_" + query_index
+	return KV
 }
 
 func sql_query(query string) string {
 	csql := C.CString(query)
+	defer C.free(unsafe.Pointer(csql))
 	cc := C.GoString(C.ddd(csql))
 
 	sql, msg, ret := RTC_sql_check(cc)
 
 	fmt.Println(sql, msg, ret)
 
-	cret, emsg := checkSQL(sql)
-	fmt.Println(cret, emsg)
-	C.free(unsafe.Pointer(csql))
-	return "OK"
+	cret, kv := checkSQL(sql)
+	if cret == true {
+		conn, err := dbpoll.NewClient()
+		if err != nil {
+			time.Sleep(1)
+			conn, err = dbpoll.NewClient()
+			if err != nil {
+				fmt.Println("Failed to create new client:", err)
+				return "INEL ERROR"
+			}
+		}
+		defer conn.Close()
+
+		if res, err := conn.Get(kv); err == nil {
+			return "kv-----[" + res.String() + "]"
+		}
+	}
+	fmt.Println(cret, kv)
+	return "ERROR"
 }
 
 func test_pars() {
@@ -309,19 +349,5 @@ func test_pars() {
 	cret, emsg := checkSQL(sql)
 	fmt.Println(cret, emsg)
 
-	/*
-		str2 := "select asdddd from T_devices.ddd with zxc and xxx where created_at >= 1466252795 and product_id = 'T_devices.product_id' and product_id = \"T_devices.product_id\" and time =\"ad\" and time >'asd';"
-		cstr = C.CString(str2)
-
-		//fmt.Println(str2)
-		dd := C.GoString(C.ddd(cstr))
-		//fmt.Println(dd)
-
-		sql, msg, ret = RTC_sql_check(dd)
-		fmt.Println(sql, msg, ret)
-
-		cret, emsg = checkSQL(sql)
-		fmt.Println(cret, emsg)
-	*/
 	C.free(unsafe.Pointer(cstr))
 }
