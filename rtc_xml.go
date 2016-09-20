@@ -204,6 +204,7 @@ func CheckAndFix_table_key(table *Table, t_key *Table_Key) (string, bool) {
 	//check index
 	if t_len := len(t_key.Index); t_len != 0 {
 		for i := 0; i < t_len; i++ {
+			t_key.Index[i].Name = strings.ToLower(t_key.Index[i].Name)
 			t_key.Index[i].Columnref = ArrayFilterAndFormat(t_key.Index[i].Columnref)
 			c_len := len(t_key.Index[i].Columnref)
 			for c := 0; c < c_len; c++ {
