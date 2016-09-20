@@ -117,20 +117,23 @@ const char* interp(NODE *n)
             /* Make the call to Select */
 
 			int i;
+/*
 			cout << "Select\n";
 			cout << "   nSelAttrs = " << nSelAttrs << "\n";
 			for (i = 0; i < nSelAttrs; i++)
 				cout << "   selAttrs[" << i << "]:" << relAttrs[i] << "\n";
+*/
 
 			string xml;
 			string xml_begin ="<?xml version=\"1.0\" encoding=\"UTF-8\"?> <all>";
 			char TMP[1023];
 			sprintf(TMP,"<op>%s</op>",relAttrs[0].attrName);
 			string xml_OP =TMP;
+/*
 			cout << "   nRelations = " << nRelations << "\n";
 			for (i = 0; i < nRelations; i++)
 				cout << "   relations[" << i << "] " << relations[i] << "\n";
-
+*/
 			sprintf(TMP,"<table>%s</table><key>%s</key>",relations[0],relations[1]);
 			string xml_TABLE = TMP;
 
@@ -138,20 +141,26 @@ const char* interp(NODE *n)
 			string xml_WITH;
 			//cout << "   nWithAttrs = " << nWithAttrs<< "\n";
 			for (i = 0; i < nWithAttrs; i++) {
-				cout << "   withAttrs[" << i << "]:" << withAttrs[i] << "\n";
+			//	cout << "   withAttrs[" << i << "]:" << withAttrs[i] << "\n";
 				sprintf(TMP,"<with>%s</with>", withAttrs[i]);
 				xml_WITH += TMP;
 			}
 
 
 			string xml_Condtion;
-			cout << "   nCondtions = " << nConditions << "\n";
+			//cout << "   nCondtions = " << nConditions << "\n";
 			for (i = 0; i < nConditions; i++) {
-				cout << "   conditions[" << i << "]:" << conditions[i] << "\n";
+			//	cout << "   conditions[" << i << "]:" << conditions[i] << "\n";
 
-				sprintf(TMP,"<condition><lhsAttr>%s</lhsAttr><op>%s</op><value>%s</value><val_type>%s</val_type></condition>",
-					  conditions[i].lhsAttr.attrName, string_op(conditions[i].op),
-					  get_value(conditions[i].rhsValue).c_str(), type_value(conditions[i].rhsValue));
+				if (conditions[i].bRhsIsAttr) {
+					sprintf(TMP,"<condition><lhsAttr>%s</lhsAttr><op>%s</op><value>%s</value><val_type>%s</val_type></condition>",
+							conditions[i].lhsAttr.attrName, string_op(conditions[i].op),
+							conditions[i].rhsAttr.attrName, "Attr");
+				} else {
+					sprintf(TMP,"<condition><lhsAttr>%s</lhsAttr><op>%s</op><value>%s</value><val_type>%s</val_type></condition>",
+							conditions[i].lhsAttr.attrName, string_op(conditions[i].op),
+							get_value(conditions[i].rhsValue).c_str(), type_value(conditions[i].rhsValue));
+				}
 				xml_Condtion += TMP;
 			}
 

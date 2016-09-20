@@ -39,6 +39,10 @@ func RTC_sql_check(xmls string) (sql RTC_Sql, msg string, ret bool) {
 	sql.With[1] = strings.ToLower(sql.With[1])
 
 	for _, item := range sql.Condis {
+
+		if item.Val_type == "Attr" {
+			return sql, item.LhsAttr + item.Op + item.Value + " format error", false
+		}
 		item.LhsAttr = strings.ToLower(item.LhsAttr)
 	}
 
