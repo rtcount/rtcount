@@ -441,6 +441,10 @@ func sql_query(query string) string {
 	defer C.free(unsafe.Pointer(csql))
 	cc := C.GoString(C.ddd(csql))
 
+	if cc == "" {
+		return "{\"code\":-1, \"msg\":\"SQL Syntax Error\"}"
+	}
+
 	//fmt.Println(cc)
 
 	query_index := make(map[string]string)
@@ -449,44 +453,46 @@ func sql_query(query string) string {
 
 	if ret == false {
 		fmt.Println(sql, msg, ret)
-		return msg
+		return "{\"code\":-1, \"msg\":\"" + msg + "\"}"
 	}
 
-	cret, kv := checkSQL(sql, &query_index)
-	if cret == true {
-		conn, err := dbpoll.NewClient()
+	ret, msg = checkSQL(sql, &query_index)
+
+	if ret == false {
+		return "{\"code\":-1, \"msg\":\"" + msg + "\"}"
+	}
+
+	conn, err := dbpoll.NewClient()
+	if err != nil {
+		time.Sleep(1)
+		conn, err = dbpoll.NewClient()
 		if err != nil {
-			time.Sleep(1)
-			conn, err = dbpoll.NewClient()
-			if err != nil {
-				fmt.Println("Failed to create new client:", err)
-				return "INEL ERROR"
-			}
+			fmt.Println("Failed to create new client:", err)
+			return "{\"code\":-1, \"msg\":\"INEL ERROR\"}"
 		}
-		defer conn.Close()
-
-		for idx, val := range query_index {
-			//fmt.Println("ssdb:", val)
-			if res, err := conn.Get(val); err == nil {
-				if res.String() == "" {
-					query_index[idx] = "0"
-				} else {
-					query_index[idx] = res.String()
-				}
-			}
-		}
-		/*
-			if res, err := conn.Get(kv); err == nil {
-				return "kv-----[" + res.String() + "]"
-			}
-		*/
-
-		b, _ := json.Marshal(query_index)
-		//fmt.Println(string(b))
-		//fmt.Println(cret, kv, query_index)
-		return string(b)
 	}
-	return kv
+	defer conn.Close()
+
+	for idx, val := range query_index {
+		//fmt.Println("ssdb:", val)
+		if res, err := conn.Get(val); err == nil {
+			if res.String() == "" {
+				query_index[idx] = "0"
+			} else {
+				query_index[idx] = res.String()
+			}
+		}
+	}
+	/*
+		if res, err := conn.Get(kv); err == nil {
+			return "kv-----[" + res.String() + "]"
+		}
+	*/
+
+	b, _ := json.Marshal(query_index)
+	//fmt.Println(string(b))
+	//fmt.Println(cret, kv, query_index)
+	return string(b)
 }
 
 /*
