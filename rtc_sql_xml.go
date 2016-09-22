@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/xml"
+	"fmt"
 	"strings"
 )
 
@@ -30,7 +31,6 @@ func RTC_sql_check(xmls string) (sql RTC_Sql, msg string, ret bool) {
 	if err != nil {
 		return sql, "xml parse<" + xmls + ">fail!", false
 	}
-	//fmt.Println(sql)
 
 	sql.Op = strings.ToLower(sql.Op)
 	sql.Table = strings.ToLower(sql.Table)
@@ -46,5 +46,8 @@ func RTC_sql_check(xmls string) (sql RTC_Sql, msg string, ret bool) {
 		item.LhsAttr = strings.ToLower(item.LhsAttr)
 	}
 
+	if 0 == 1 {
+		fmt.Println(sql)
+	}
 	return sql, "OK", true
 }
