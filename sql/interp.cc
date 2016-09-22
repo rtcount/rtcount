@@ -57,6 +57,44 @@ static const char* string_op(CompOp op);
 static const char* type_value(Value &value);
 static string get_value(Value &value);
 
+void string_replace( string &strBig, const string strsrc, const string strdst )
+{
+ std::string::size_type pos = 0;
+ std::string::size_type srclen = strsrc.size();
+ std::string::size_type dstlen = strdst.size();
+ 
+ while( (pos=strBig.find(strsrc, pos)) != std::string::npos )
+ {
+  strBig.replace( pos, srclen, strdst );
+  pos += dstlen;
+ }
+} 
+
+string encodeString(string &strData)  
+{  
+	if (strData=="")  
+	{  
+		return "";  
+	}  
+
+	string_replace(strData, "&", "&amp;");  
+	string_replace(strData, "<", "&lt;");  
+	string_replace(strData, ">", "&gt;");  
+	string_replace(strData, "'", "&apos;");  
+	string_replace(strData, "\"", "&quot;");  
+	return strData;  
+}  
+
+string decodeString(string strData)  
+{  
+
+	string_replace(strData, "&lt;", "<");  
+	string_replace(strData, "&gt;", ">");  
+	string_replace(strData, "&apos;", "'");  
+	string_replace(strData, "&quot;", "\"");  
+	string_replace(strData, "&amp;", "&");  
+	return strData;  
+} 
 
 /*
  * interp: interprets parse trees
@@ -153,13 +191,19 @@ const char* interp(NODE *n)
 			//	cout << "   conditions[" << i << "]:" << conditions[i] << "\n";
 
 				if (conditions[i].bRhsIsAttr) {
+					string strTmp1 = string_op(conditions[i].op);
+					encodeString(strTmp1); 
 					sprintf(TMP,"<condition><lhsAttr>%s</lhsAttr><op>%s</op><value>%s</value><val_type>%s</val_type></condition>",
-							conditions[i].lhsAttr.attrName, string_op(conditions[i].op),
+							conditions[i].lhsAttr.attrName, strTmp1.c_str(),
 							conditions[i].rhsAttr.attrName, "Attr");
 				} else {
+					string strTmp1 = string_op(conditions[i].op);
+					encodeString(strTmp1) ; 
+					string strTmp2 = get_value(conditions[i].rhsValue).c_str();
+					encodeString(strTmp2) ; 
 					sprintf(TMP,"<condition><lhsAttr>%s</lhsAttr><op>%s</op><value>%s</value><val_type>%s</val_type></condition>",
-							conditions[i].lhsAttr.attrName, string_op(conditions[i].op),
-							get_value(conditions[i].rhsValue).c_str(), type_value(conditions[i].rhsValue));
+							conditions[i].lhsAttr.attrName, strTmp1.c_str(),
+							strTmp2.c_str(), type_value(conditions[i].rhsValue));
 				}
 				xml_Condtion += TMP;
 			}
@@ -168,6 +212,7 @@ const char* interp(NODE *n)
 			xml = xml_begin + xml_OP + xml_TABLE + xml_WITH + xml_Condtion + xml_end;
 			//cout << xml <<"\n";
 			char * xml_c = (char *) malloc(xml.length()+1);
+			memset(xml_c, 0, strlen(xml.c_str())+1);
 			memcpy(xml_c, xml.c_str(), xml.length());
 			return xml_c;
 
@@ -768,25 +813,6 @@ static void print_values(NODE *n)
    }
 }
 
-//void RBparse(const char * str);
-
-
-/*
-int main()
-{
-
-char tstr[] = "select asdddd from T_devices.ddd with zxc and xxx where created_at >= 1466252795 and product_id = 'T_devices.product_id' and product_id = \"T_devices.product_id\" and time =\"ad\" and time >'asd';";
-
-	RBparse(tstr);
-
-char tstr2[] = "select ddd from ddd.ddd with ddd and ddd where ddd >= 1466252795 and ddd_id = 'ddd' and ddd = \"ddd\" and ddd =\"ddd\" and ddd >'ddd';";
-
-	RBparse(tstr2);
-     return 0;
-}
-
-*/
-
 #ifdef __cplusplus    //__cplusplus是cpp中自定义的一个宏
 extern "C" {          //告诉编译器，这部分代码按C语言的格式进行编译，而不是C++的
 #endif
@@ -806,24 +832,18 @@ const char* ddd(const char * str)
 	if (dd==NULL)
 		return "";
 
-	memset(dd_xml_parser, 0, 1024*10);
+	memset(dd_xml_parser, 0, 1024*10-1);
 	memcpy(dd_xml_parser, dd, strlen(dd));
+
 	free(dd);
+
 	return (const char*)dd_xml_parser;
-/*
-	   char tstr[] = "select asdddd from T_devices.ddd with zxc and xxx where created_at >= 1466252795 and product_id = 'T_devices.product_id' and product_id = \"T_devices.product_id\" and time =\"ad\" and time >'asd';";
-
-	   RBparse(tstr);
-
-	   char tstr2[] = "select ddd from ddd.ddd with ddd and ddd where ddd >= 1466252795 and ddd_id = 'ddd' and ddd = \"ddd\" and ddd =\"ddd\" and ddd >'ddd';";
-
-	   RBparse(tstr2);
-*/
 }
 
 /*
 int main()
 {
-return ddd();
+char tstr[] = "select asdddd from T_devices.ddd with zxc and xxx where created_at >= 1466252795 and product_id = 'T_devices.product_id' and prod
+return ddd(tstr);
 }
 */
