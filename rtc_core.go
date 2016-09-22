@@ -35,7 +35,7 @@ func rtcount_gen_dates(timestmp int64, t_key *Table_Key) []string {
 	var dates []string
 
 	tm := time.Unix(timestmp, 0)
-	f := tm.Format("200601020304")
+	f := tm.Format("200601021504")
 
 	year, week := tm.ISOWeek()
 	//fmt.Println("\nweek---", year, week)
