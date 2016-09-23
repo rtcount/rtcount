@@ -1,32 +1,10 @@
 package main
 
 import (
-	// #cgo LDFLAGS: -L${SRCDIR}/ -L./lib -lparser -ldl
+	// #cgo LDFLAGS: -L${SRCDIR}/ ./sql/libparser.a -lstdc++
 	/*
 		#include <stdlib.h>
-		#include <dlfcn.h>
-
-
-		const char* (*dl_ddd)(const char * str);
-		static int xx=0;
-
-		static int c_dl_init(char* lib_path){
-			if (xx==0) {
-				char* func_name="ddd";
-				void* libc;
-				if(libc = dlopen(lib_path,RTLD_LAZY))
-				{
-					dl_ddd = dlsym(libc, func_name);
-				} else
-					return -1;
-			}
-			xx=1;
-			return 0;
-		}
-
-		const char* dddd(char* sql){
-		return (*dl_ddd)(sql);
-		}
+		#include "sql/api.h"
 	*/
 	"C"
 	"encoding/json"
@@ -470,17 +448,9 @@ func sql_gen_key(OP string, Table string, Key string, query_index *map[string]st
 
 func sql_query(query string) string {
 
-	libpath := getCurrentDirectory() + "/lib/libparser.so"
-	//fmt.Println(libpath)
-	c_path := C.CString(libpath)
-	defer C.free(unsafe.Pointer(c_path))
-	if C.c_dl_init(c_path) == -1 {
-		return "{\"code\":-1, \"msg\":\"Int SQL Parser Engine Error\"}"
-	}
-
 	csql := C.CString(query)
 	defer C.free(unsafe.Pointer(csql))
-	cc := C.GoString(C.dddd(csql))
+	cc := C.GoString(C.ddd(csql))
 
 	if cc == "" {
 		return "{\"code\":-1, \"msg\":\"SQL Syntax Error\"}"
