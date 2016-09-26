@@ -57,53 +57,47 @@ func info(w http.ResponseWriter, req *http.Request) {
 		for _, t_key := range table.Keys {
 
 			rtc_server_info += "KEY: " + t_key.Name + "<br>"
-			kv_pre := table.Name + "_" + t_key.Name
+			//kv_pre := table.Name + "_" + t_key.Name
 			opkey := t_key.keyopFlag
-			if opkey&COUNT == COUNT {
-				kvkey := OP_KEY["count"] + "_" + kv_pre + "_a_a"
-				if res, err := conn.Get(kvkey); err == nil {
-					rtc_server_info += " COUNT[ " + res.String() + " ]"
-				} else {
-					rtc_server_info += " COUNT[ 0 ]"
-				}
-			}
 
-			if opkey&NEW == NEW {
-				kvkey := OP_KEY["new"] + "_" + kv_pre + "_a_a"
-				if res, err := conn.Get(kvkey); err == nil {
-					rtc_server_info += " NEW[ " + res.String() + " ]"
-				} else {
-					rtc_server_info += " NEW[ 0 ]"
+			for _, indx := range t_key.Index {
+				rtc_server_info += "INDEX: " + indx.Name + "<br>"
+				if opkey&COUNT == COUNT {
+					//select COUNT from table.Name.t_key.Name with TIME and INDEX
+					Sql := "select COUNT from " + table.Name + "." + t_key.Name + " with " + indx.Name + " and " + t_key.Timeindex.Tm[0] + ";"
+					ret := sql_query(Sql)
+					rtc_server_info += " COUNT[ " + ret + " ]"
 				}
-			}
 
-			if opkey&SUM == SUM {
-				kvkey := OP_KEY["sum"] + "_" + kv_pre + "_a_a"
-				if res, err := conn.Get(kvkey); err == nil {
-					rtc_server_info += " SUM[ " + res.String() + " ]"
-				} else {
-					rtc_server_info += " SUM[ 0 ]"
+				if opkey&NEW == NEW {
+					//select NEW from table.Name.t_key.Name with TIME and INDEX
+					Sql := "select NEW from " + table.Name + "." + t_key.Name + " with " + indx.Name + " and " + t_key.Timeindex.Tm[0] + ";"
+					ret := sql_query(Sql)
+					rtc_server_info += " NEW[ " + ret + " ]"
 				}
-			}
 
-			if opkey&MAX == MAX {
-				kvkey := OP_KEY["max"] + "_" + kv_pre + "_a_a"
-				if res, err := conn.Get(kvkey); err == nil {
-					rtc_server_info += " MAX[ " + res.String() + " ]"
-				} else {
-					rtc_server_info += " MAX[ 0 ]"
+				if opkey&SUM == SUM {
+					//select SUM from table.Name.t_key.Name with TIME and INDEX
+					Sql := "select SUM from " + table.Name + "." + t_key.Name + " with " + indx.Name + " and " + t_key.Timeindex.Tm[0] + ";"
+					ret := sql_query(Sql)
+					rtc_server_info += " SUM[ " + ret + " ]"
 				}
-			}
 
-			if opkey&MIN == MIN {
-				kvkey := OP_KEY["min"] + "_" + kv_pre + "_a_a"
-				if res, err := conn.Get(kvkey); err == nil {
-					rtc_server_info += " MIN[ " + res.String() + " ]"
-				} else {
-					rtc_server_info += " MIN[ 0 ]"
+				if opkey&MAX == MAX {
+					//select MAX from table.Name.t_key.Name with TIME and INDEX
+					Sql := "select MAX from " + table.Name + "." + t_key.Name + " with " + indx.Name + " and " + t_key.Timeindex.Tm[0] + ";"
+					ret := sql_query(Sql)
+					rtc_server_info += " MAX[ " + ret + " ]"
 				}
+
+				if opkey&MIN == MIN {
+					//select MAX from table.Name.t_key.Name with TIME and INDEX
+					Sql := "select MIN from " + table.Name + "." + t_key.Name + " with " + indx.Name + " and " + t_key.Timeindex.Tm[0] + ";"
+					ret := sql_query(Sql)
+					rtc_server_info += " MIN[ " + ret + " ]"
+				}
+				rtc_server_info += " <br>"
 			}
-			rtc_server_info += " <br>"
 		}
 	}
 
